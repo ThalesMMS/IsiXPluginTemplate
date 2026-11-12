@@ -1,0 +1,6 @@
+# GitHub's language statistics. The plugin is written in Swift: SDK/ is a copy
+# of the IsiXPluginKit SDK a release of the application publishes, and script/
+# and tests/ are the project's tooling.
+SDK/** linguist-vendored
+script/** linguist-detectable=false
+tests/** linguist-detectable=false
