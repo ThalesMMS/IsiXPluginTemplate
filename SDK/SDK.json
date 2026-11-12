@@ -1,0 +1,23 @@
+{
+  "name": "IsiXPluginKit",
+  "apiVersion": 1,
+  "kitVersion": "1.0.0",
+  "revision": "3d4e52fd9631f2d0783d6c727c4cedbc9900c1da",
+  "configuration": "Release",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "interfaces": [
+    "arm64-apple-macos.swiftinterface",
+    "x86_64-apple-macos.swiftinterface"
+  ],
+  "minimumSystem": "15.0",
+  "compiler": "Apple Swift version 6.4.2 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)",
+  "installName": "@rpath/IsiXPluginKit.framework/Versions/A/IsiXPluginKit",
+  "binarySHA256": "56f796e41f265c5b8b0703e28740d3ad32490a825011c54f3e0390fbf9f25b02",
+  "interfaceSHA256": {
+    "arm64-apple-macos.swiftinterface": "541f035bdcf31e0fb1092c48a8223f1b8c3be848178dcafc3ef95124e1039b08",
+    "x86_64-apple-macos.swiftinterface": "d22e481481218cd0bb36c8745bdcbbefaf45949cecad02215f376f4a9f4e3b8c"
+  }
+}

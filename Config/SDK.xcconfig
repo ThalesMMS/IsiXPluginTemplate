@@ -1,0 +1,12 @@
+// Where the IsiXPluginKit SDK is: the folder that holds IsiXPluginKit.framework
+// and SDK.json. The plugin compiles against the framework's .swiftinterface and
+// links its binary; the bundle never carries a copy, because the application
+// provides the framework at run time.
+//
+// The default is the SDK folder of this project. To use another one, put
+//     ISIX_SDK_DIR = /path/to/folder
+// in Config/SDK.local.xcconfig (ignored by Git), or pass ISIX_SDK_DIR=... to
+// xcodebuild or to script/build.sh.
+ISIX_SDK_DIR = $(PROJECT_DIR)/SDK
+
+#include? "SDK.local.xcconfig"

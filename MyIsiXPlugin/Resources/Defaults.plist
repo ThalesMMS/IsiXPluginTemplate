@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ROIName</key>
+	<string>My IsiX Plugin</string>
+	<key>ROIKind</key>
+	<string>oval</string>
+	<key>ROISizePercent</key>
+	<integer>50</integer>
+	<key>ShowResultSheet</key>
+	<true/>
+</dict>
+</plist>

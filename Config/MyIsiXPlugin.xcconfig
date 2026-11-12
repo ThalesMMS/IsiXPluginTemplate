@@ -1,0 +1,78 @@
+// Build settings of the plugin target. Change the identity here; see README.md.
+
+#include "SDK.xcconfig"
+
+// Identity. The bundle identifier must be yours (reverse DNS) and stay the same
+// across versions: the application tells plugins apart by it, and the install
+// script refuses to replace a bundle that has another one.
+PRODUCT_NAME = MyIsiXPlugin
+PRODUCT_BUNDLE_IDENTIFIER = com.example.myisixplugin
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
+
+// The class that adopts IsiXPlugin. Info.plist names it qualified by the Swift
+// module, $(PRODUCT_MODULE_NAME).$(ISIX_PLUGIN_ENTRY_CLASS): a bare class name
+// does not resolve.
+ISIX_PLUGIN_ENTRY_CLASS = MyIsiXPlugin
+
+// The .isixplugin bundle: a Mach-O bundle with the plugin API's extension.
+WRAPPER_EXTENSION = isixplugin
+MACH_O_TYPE = mh_bundle
+INFOPLIST_FILE = Config/Info.plist
+GENERATE_INFOPLIST_FILE = NO
+INFOPLIST_KEY_CFBundleDisplayName = $(PRODUCT_NAME)
+SKIP_INSTALL = YES
+
+// System and architectures. Debug builds the Mac's own architecture; Release
+// builds arm64 (Apple silicon) and x86_64 (Intel, and Rosetta) in one bundle.
+// script/build.sh --arch chooses one.
+MACOSX_DEPLOYMENT_TARGET = 15.0
+ARCHS = arm64 x86_64
+ONLY_ACTIVE_ARCH[config=Debug] = YES
+ONLY_ACTIVE_ARCH[config=Release] = NO
+
+// Swift 6, complete concurrency checking.
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
+SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug] = DEBUG
+DEBUG_INFORMATION_FORMAT[config=Debug] = dwarf
+DEBUG_INFORMATION_FORMAT[config=Release] = dwarf-with-dsym
+ENABLE_TESTABILITY[config=Debug] = YES
+GCC_OPTIMIZATION_LEVEL[config=Debug] = 0
+
+// The kit: found in the SDK folder, linked, never embedded or copied. No
+// bridging header, no -undefined dynamic_lookup: everything the plugin uses
+// comes from IsiXPluginKit and the system. No run path is added: the
+// application has already loaded its IsiXPluginKit when it loads the plugin.
+FRAMEWORK_SEARCH_PATHS = $(inherited) "$(ISIX_SDK_DIR)"
+OTHER_LDFLAGS = $(inherited) -framework IsiXPluginKit $(ISIX_LIBRARIES_LDFLAGS)
+SYSTEM_HEADER_SEARCH_PATHS = $(inherited) $(ISIX_LIBRARIES_HEADER_PATHS)
+LIBRARY_SEARCH_PATHS = $(inherited) $(ISIX_LIBRARIES_LIBRARY_PATHS)
+LD_RUNPATH_SEARCH_PATHS =
+SWIFT_OBJC_BRIDGING_HEADER =
+
+// Symbols. The plugin exports none: the application finds the entry class
+// through the Objective-C runtime, not by symbol. Exporting nothing also keeps
+// a library the plugin carries (ITK, DCMTK, ...) its own: dyld would bind the
+// plugin's uses of an exported C++ template or inline function to the
+// application's copy of the same name. C, C++ and Objective-C code is
+// compiled with hidden visibility as well. See README.md, "Libraries of your own".
+EXPORTED_SYMBOLS_FILE = $(PROJECT_DIR)/Config/Exports.exp
+GCC_SYMBOLS_PRIVATE_EXTERN = YES
+GCC_INLINES_ARE_PRIVATE_EXTERN = YES
+
+// Signed ad hoc for local use. To distribute, sign with your Developer ID
+// (see README.md); the application checks that the signature is intact.
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+ENABLE_HARDENED_RUNTIME = NO
+DEAD_CODE_STRIPPING = YES
+// The SDK check reads the whole SDK folder, wherever ISIX_SDK_DIR points.
+ENABLE_USER_SCRIPT_SANDBOXING = NO
+
+// The libraries the plugin carries, if any: copy Config/Libraries.xcconfig.example
+// to Config/Libraries.xcconfig. See README.md, "Libraries of your own".
+#include? "Libraries.xcconfig"

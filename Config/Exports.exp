@@ -1,0 +1,4 @@
+# The symbols the plugin exports: none. EXPORTED_SYMBOLS_FILE in
+# Config/MyIsiXPlugin.xcconfig names this file. The application finds the entry
+# class through the Objective-C runtime, and a library the plugin carries must
+# not export its symbols; see README.md, "Libraries of your own".

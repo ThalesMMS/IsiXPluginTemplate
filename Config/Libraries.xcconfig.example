@@ -1,0 +1,28 @@
+// Build settings for libraries the plugin carries inside its bundle. Copy this
+// file to Config/Libraries.xcconfig, which Config/MyIsiXPlugin.xcconfig
+// includes, and keep the lines of the libraries you use. Build each library
+// first with script/build-library.py (see README.md, "Libraries of your own"):
+//
+//     script/build-library.py itk --source <ITK source folder>
+//
+// which installs it in Libraries/<Name>: headers in include/, one static
+// archive in lib/lib<Name>.a. Config/MyIsiXPlugin.xcconfig adds the three
+// ISIX_LIBRARIES_ settings below to the header and library search paths and
+// to the linker flags.
+
+ISIX_LIBRARIES_DIR = $(PROJECT_DIR)/Libraries
+
+// ITK only. For ITK and DCMTK, list both folders and both libraries:
+//     ISIX_LIBRARIES_HEADER_PATHS = "$(ISIX_LIBRARIES_DIR)/ITK/include" "$(ISIX_LIBRARIES_DIR)/DCMTK/include"
+//     ISIX_LIBRARIES_LIBRARY_PATHS = "$(ISIX_LIBRARIES_DIR)/ITK/lib" "$(ISIX_LIBRARIES_DIR)/DCMTK/lib"
+//     ISIX_LIBRARIES_LDFLAGS = -lITK -lDCMTK -lz -lc++
+ISIX_LIBRARIES_HEADER_PATHS = "$(ISIX_LIBRARIES_DIR)/ITK/include"
+ISIX_LIBRARIES_LIBRARY_PATHS = "$(ISIX_LIBRARIES_DIR)/ITK/lib"
+ISIX_LIBRARIES_LDFLAGS = -lITK -lz -lc++
+
+// The C++ the libraries are written in. Swift does not call C++ here: the
+// plugin's own Objective-C++ or C++ files wrap the library behind a C or
+// Objective-C interface, which this bridging header declares to Swift.
+CLANG_CXX_LANGUAGE_STANDARD = c++17
+CLANG_CXX_LIBRARY = libc++
+SWIFT_OBJC_BRIDGING_HEADER = MyIsiXPlugin/Sources/Libraries-Bridging-Header.h

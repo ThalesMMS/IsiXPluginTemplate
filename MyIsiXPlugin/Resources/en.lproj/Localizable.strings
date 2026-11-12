@@ -1,0 +1,21 @@
+/* Menu commands. */
+"command.settings" = "My IsiX Plugin Settings…";
+"command.inspectImage" = "My IsiX Plugin: Inspect Image";
+"command.markCentre" = "My IsiX Plugin: Mark Centre";
+
+/* Results and errors. */
+"result.title" = "My IsiX Plugin";
+"result.none" = "No result yet.";
+"error.noViewer" = "Open an image in a 2D viewer first, then choose the command again.";
+"error.cancelled" = "The measurement stopped because the viewer closed.";
+
+/* Settings window. */
+"settings.title" = "My IsiX Plugin Settings";
+"settings.roiName" = "ROI name:";
+"settings.roiKind" = "ROI shape:";
+"settings.roiKind.oval" = "Oval";
+"settings.roiKind.rectangle" = "Rectangle";
+"settings.roiSize" = "ROI size (% of the image):";
+"settings.showSheet" = "Show results in a sheet on the viewer";
+"settings.lastResult" = "Last result:";
+"settings.done" = "Done";

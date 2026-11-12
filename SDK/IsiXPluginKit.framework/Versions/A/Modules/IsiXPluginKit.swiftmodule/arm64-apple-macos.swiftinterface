@@ -1,0 +1,896 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.4.2 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)
+// swift-module-flags: -target arm64-apple-macos15.0 -enable-objc-interop -enable-library-evolution -language-mode 6 -O -enable-experimental-feature DebugDescriptionMacro -module-name IsiXPluginKit
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.4.2
+import AppKit
+import Foundation
+import ObjectiveC
+import Swift
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+public struct IsiXCommand : Swift::Hashable, Swift::Sendable {
+  public enum Placement : Swift::Hashable, Swift::Sendable {
+    case imageFilters
+    case roiTools
+    case database
+    case other
+    public static func == (a: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement, b: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement) -> Swift::Bool
+    public func hash(into hasher: inout Swift::Hasher)
+    public var hashValue: Swift::Int {
+      get
+    }
+  }
+  public enum Requirement : Swift::Hashable, Swift::Sendable {
+    case none
+    case viewer
+    public static func == (a: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Requirement, b: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Requirement) -> Swift::Bool
+    public func hash(into hasher: inout Swift::Hasher)
+    public var hashValue: Swift::Int {
+      get
+    }
+  }
+  public var id: Swift::String
+  public var title: Swift::String
+  public var placement: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement
+  public var requirement: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Requirement
+  public init(id: Swift::String, title: Swift::String, placement: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement = .other, requirement: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Requirement = .none)
+  public static func == (a: IsiXPluginKit::IsiXCommand, b: IsiXPluginKit::IsiXCommand) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers @_Concurrency::MainActor final public class IsiXCommandInvocation {
+  @_Concurrency::MainActor final public let command: IsiXPluginKit::IsiXCommand
+  @_Concurrency::MainActor final public let viewer: IsiXPluginKit::IsiXViewer?
+  @_Concurrency::MainActor final public let parentWindow: AppKit::NSWindow?
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @_Concurrency::MainActor final public class IsiXTask {
+  @_Concurrency::MainActor final public let name: Swift::String
+  @_Concurrency::MainActor final public let progress: IsiXPluginKit::IsiXTaskProgress
+  @_Concurrency::MainActor final public var isFinished: Swift::Bool {
+    get
+  }
+  @_Concurrency::MainActor final public var error: (any Swift::Error)? {
+    get
+  }
+  @_Concurrency::MainActor final public func cancel()
+  @_Concurrency::MainActor final public func value() async throws
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers final public class IsiXTaskProgress : @unchecked Swift::Sendable {
+  final public var fractionCompleted: Swift::Double {
+    get
+  }
+  final public var message: Swift::String? {
+    get
+  }
+  final public var isCancelled: Swift::Bool {
+    get
+  }
+  final public func report(_ fraction: Swift::Double, message: Swift::String? = nil)
+  @objc deinit
+}
+public struct IsiXStudy : Swift::Hashable, Swift::Sendable {
+  public var studyInstanceUID: Swift::String
+  public var patientID: Swift::String?
+  public var patientName: Swift::String?
+  public var studyDescription: Swift::String?
+  public var studyDate: Foundation::Date?
+  public var modalities: [Swift::String]
+  public var seriesCount: Swift::Int
+  public var accessionNumber: Swift::String?
+  public var studyID: Swift::String?
+  public var patientBirthDate: Foundation::Date?
+  public var patientSex: Swift::String?
+  public var referringPhysician: Swift::String?
+  public var performingPhysician: Swift::String?
+  public var institutionName: Swift::String?
+  public var dateAdded: Foundation::Date?
+  public var imageCount: Swift::Int
+  public var comments: [Swift::String]
+  public var state: Swift::Int
+  public var report: Swift::String?
+  public var isLocked: Swift::Bool
+  public static func == (a: IsiXPluginKit::IsiXStudy, b: IsiXPluginKit::IsiXStudy) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSeries : Swift::Hashable, Swift::Sendable {
+  public var seriesInstanceUID: Swift::String
+  public var studyInstanceUID: Swift::String
+  public var seriesDescription: Swift::String?
+  public var modality: Swift::String?
+  public var seriesNumber: Swift::Int?
+  public var imageCount: Swift::Int
+  public var seriesDate: Foundation::Date?
+  public var sopClassUID: Swift::String?
+  public var comments: [Swift::String]
+  public var state: Swift::Int
+  public static func == (a: IsiXPluginKit::IsiXSeries, b: IsiXPluginKit::IsiXSeries) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImportResult : Swift::Hashable, Swift::Sendable {
+  public struct Failure : Swift::Hashable, Swift::Sendable {
+    public var file: Foundation::URL
+    public var reason: Swift::String
+    public static func == (a: IsiXPluginKit::IsiXImportResult.IsiXPluginKit::Failure, b: IsiXPluginKit::IsiXImportResult.IsiXPluginKit::Failure) -> Swift::Bool
+    public func hash(into hasher: inout Swift::Hasher)
+    public var hashValue: Swift::Int {
+      get
+    }
+  }
+  public var importedFiles: [Foundation::URL]
+  public var studyInstanceUIDs: [Swift::String]
+  public var seriesInstanceUIDs: [Swift::String]
+  public var failures: [IsiXPluginKit::IsiXImportResult.IsiXPluginKit::Failure]
+  public var images: [IsiXPluginKit::IsiXDatabaseImage]
+  public static func == (a: IsiXPluginKit::IsiXImportResult, b: IsiXPluginKit::IsiXImportResult) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXDerivedSeriesRequest : Swift::Sendable, Swift::Equatable {
+  public var studyInstanceUID: Swift::String
+  public var seriesDescription: Swift::String
+  public var images: [IsiXPluginKit::IsiXPixelData]
+  public var sourceSOPInstanceUID: Swift::String?
+  public var seriesInstanceUID: Swift::String?
+  public var seriesNumber: Swift::Int?
+  public var firstInstanceNumber: Swift::Int
+  public var geometries: [IsiXPluginKit::IsiXImageGeometry]?
+  public var windowLevel: IsiXPluginKit::IsiXWindowLevel?
+  public init(studyInstanceUID: Swift::String, seriesDescription: Swift::String, images: [IsiXPluginKit::IsiXPixelData])
+  public static func == (a: IsiXPluginKit::IsiXDerivedSeriesRequest, b: IsiXPluginKit::IsiXDerivedSeriesRequest) -> Swift::Bool
+}
+@_hasMissingDesignatedInitializers @_Concurrency::MainActor final public class IsiXDatabase {
+  @_Concurrency::MainActor final public func selectedStudies() async throws -> [IsiXPluginKit::IsiXStudy]
+  @_Concurrency::MainActor final public func study(withInstanceUID uid: Swift::String) async throws -> IsiXPluginKit::IsiXStudy?
+  @_Concurrency::MainActor final public func series(inStudy studyInstanceUID: Swift::String) async throws -> [IsiXPluginKit::IsiXSeries]
+  @_Concurrency::MainActor final public func writeDerivedSeries(_ request: IsiXPluginKit::IsiXDerivedSeriesRequest) async throws -> [Foundation::URL]
+  @_Concurrency::MainActor final public func importFiles(at urls: [Foundation::URL]) async throws -> IsiXPluginKit::IsiXImportResult
+  @objc deinit
+}
+public struct IsiXDatabaseImage : Swift::Hashable, Swift::Sendable {
+  public var sopInstanceUID: Swift::String
+  public var seriesInstanceUID: Swift::String
+  public var studyInstanceUID: Swift::String
+  public var instanceNumber: Swift::Int?
+  public var frame: Swift::Int
+  public var numberOfFrames: Swift::Int
+  public var file: Foundation::URL?
+  public var modality: Swift::String?
+  public var columns: Swift::Int
+  public var rows: Swift::Int
+  public var sliceLocation: Swift::Double?
+  public var isKeyImage: Swift::Bool
+  public var comments: [Swift::String]
+  public var date: Foundation::Date?
+  public static func == (a: IsiXPluginKit::IsiXDatabaseImage, b: IsiXPluginKit::IsiXDatabaseImage) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXAlbum : Swift::Hashable, Swift::Sendable {
+  public var name: Swift::String
+  public var isSmart: Swift::Bool
+  public var studyCount: Swift::Int
+  public static func == (a: IsiXPluginKit::IsiXAlbum, b: IsiXPluginKit::IsiXAlbum) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXDatabaseSelection : Swift::Hashable, Swift::Sendable {
+  public var studies: [IsiXPluginKit::IsiXStudy]
+  public var series: [IsiXPluginKit::IsiXSeries]
+  public static func == (a: IsiXPluginKit::IsiXDatabaseSelection, b: IsiXPluginKit::IsiXDatabaseSelection) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXStudyQuery : Swift::Hashable, Swift::Sendable {
+  public var studyInstanceUID: Swift::String?
+  public var patientID: Swift::String?
+  public var patientName: Swift::String?
+  public var accessionNumber: Swift::String?
+  public var studyDescription: Swift::String?
+  public var modality: Swift::String?
+  public var comment: Swift::String?
+  public var studyDateFrom: Foundation::Date?
+  public var studyDateTo: Foundation::Date?
+  public var state: Swift::Int?
+  public var limit: Swift::Int?
+  public init(studyInstanceUID: Swift::String? = nil, patientID: Swift::String? = nil, patientName: Swift::String? = nil, accessionNumber: Swift::String? = nil, studyDescription: Swift::String? = nil, modality: Swift::String? = nil, comment: Swift::String? = nil, studyDateFrom: Foundation::Date? = nil, studyDateTo: Foundation::Date? = nil, state: Swift::Int? = nil, limit: Swift::Int? = nil)
+  public static func == (a: IsiXPluginKit::IsiXStudyQuery, b: IsiXPluginKit::IsiXStudyQuery) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXStudyUpdate : Swift::Hashable, Swift::Sendable {
+  public var comments: [Swift::Int : Swift::String]
+  public var state: Swift::Int?
+  public var report: Swift::String?
+  public var isLocked: Swift::Bool?
+  public init(comments: [Swift::Int : Swift::String] = [:], state: Swift::Int? = nil, report: Swift::String? = nil, isLocked: Swift::Bool? = nil)
+  public static func == (a: IsiXPluginKit::IsiXStudyUpdate, b: IsiXPluginKit::IsiXStudyUpdate) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSeriesUpdate : Swift::Hashable, Swift::Sendable {
+  public var comments: [Swift::Int : Swift::String]
+  public var state: Swift::Int?
+  public init(comments: [Swift::Int : Swift::String] = [:], state: Swift::Int? = nil)
+  public static func == (a: IsiXPluginKit::IsiXSeriesUpdate, b: IsiXPluginKit::IsiXSeriesUpdate) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImageUpdate : Swift::Hashable, Swift::Sendable {
+  public var isKeyImage: Swift::Bool?
+  public var comments: [Swift::Int : Swift::String]
+  public init(isKeyImage: Swift::Bool? = nil, comments: [Swift::Int : Swift::String] = [:])
+  public static func == (a: IsiXPluginKit::IsiXImageUpdate, b: IsiXPluginKit::IsiXImageUpdate) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+extension IsiXPluginKit::IsiXDatabase {
+  nonisolated public static let stateNames: [Swift::String]
+  nonisolated public static func isValidUID(_ uid: Swift::String) -> Swift::Bool
+  @_Concurrency::MainActor final public func selection() throws -> IsiXPluginKit::IsiXDatabaseSelection
+  @_Concurrency::MainActor final public func selectedStudies() throws -> [IsiXPluginKit::IsiXStudy]
+  @_Concurrency::MainActor final public func studies(matching query: IsiXPluginKit::IsiXStudyQuery) throws -> [IsiXPluginKit::IsiXStudy]
+  @_Concurrency::MainActor final public func study(withInstanceUID uid: Swift::String) throws -> IsiXPluginKit::IsiXStudy?
+  @_Concurrency::MainActor final public func series(inStudy studyInstanceUID: Swift::String) throws -> [IsiXPluginKit::IsiXSeries]
+  @_Concurrency::MainActor final public func series(withInstanceUID uid: Swift::String) throws -> IsiXPluginKit::IsiXSeries?
+  @_Concurrency::MainActor final public func images(inSeries seriesInstanceUID: Swift::String) throws -> [IsiXPluginKit::IsiXDatabaseImage]
+  @_Concurrency::MainActor final public func images(withSOPInstanceUID uid: Swift::String) throws -> [IsiXPluginKit::IsiXDatabaseImage]
+  @_Concurrency::MainActor final public func albums() throws -> [IsiXPluginKit::IsiXAlbum]
+  @_Concurrency::MainActor final public func studies(inAlbum name: Swift::String) throws -> [IsiXPluginKit::IsiXStudy]
+  @discardableResult
+  @_Concurrency::MainActor final public func openViewer(forSeries seriesInstanceUID: Swift::String) throws -> IsiXPluginKit::IsiXViewer?
+  @discardableResult
+  @_Concurrency::MainActor final public func updateStudy(_ studyInstanceUID: Swift::String, _ update: IsiXPluginKit::IsiXStudyUpdate) throws -> IsiXPluginKit::IsiXStudy
+  @discardableResult
+  @_Concurrency::MainActor final public func updateSeries(_ seriesInstanceUID: Swift::String, _ update: IsiXPluginKit::IsiXSeriesUpdate) throws -> IsiXPluginKit::IsiXSeries
+  @discardableResult
+  @_Concurrency::MainActor final public func updateImage(_ sopInstanceUID: Swift::String, frame: Swift::Int = 0, _ update: IsiXPluginKit::IsiXImageUpdate) throws -> IsiXPluginKit::IsiXDatabaseImage
+  @discardableResult
+  @_Concurrency::MainActor final public func createAlbum(named name: Swift::String) throws -> IsiXPluginKit::IsiXAlbum
+  @_Concurrency::MainActor final public func addStudies(_ studyInstanceUIDs: [Swift::String], toAlbum name: Swift::String) throws
+  @_Concurrency::MainActor final public func removeStudies(_ studyInstanceUIDs: [Swift::String], fromAlbum name: Swift::String) throws
+  @_Concurrency::MainActor final public func importFiles(at urls: [Foundation::URL]) throws -> IsiXPluginKit::IsiXImportResult
+  @_Concurrency::MainActor final public func writeDerivedSeries(_ request: IsiXPluginKit::IsiXDerivedSeriesRequest) throws -> [Foundation::URL]
+}
+public enum IsiXXMLRPCValue : Swift::Hashable, Swift::Sendable {
+  case string(Swift::String)
+  case int(Swift::Int)
+  case double(Swift::Double)
+  case bool(Swift::Bool)
+  case date(Foundation::Date)
+  case data(Foundation::Data)
+  case array([IsiXPluginKit::IsiXXMLRPCValue])
+  case structure([Swift::String : IsiXPluginKit::IsiXXMLRPCValue])
+  public var string: Swift::String? {
+    get
+  }
+  public subscript(member: Swift::String) -> IsiXPluginKit::IsiXXMLRPCValue? {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXXMLRPCValue, b: IsiXPluginKit::IsiXXMLRPCValue) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public typealias IsiXXMLRPCHandler = @_Concurrency::MainActor @Sendable ([IsiXPluginKit::IsiXXMLRPCValue]) throws -> IsiXPluginKit::IsiXXMLRPCValue
+extension IsiXPluginKit::IsiXPluginContext {
+  nonisolated public static func isValidXMLRPCMethodName(_ name: Swift::String) -> Swift::Bool
+  @_Concurrency::MainActor final public func registerXMLRPCMethod(named name: Swift::String, handler: @escaping IsiXPluginKit::IsiXXMLRPCHandler) throws
+  @_Concurrency::MainActor final public func unregisterXMLRPCMethod(named name: Swift::String)
+}
+public struct IsiXDICOMNode : Swift::Hashable, Swift::Sendable {
+  public var id: Swift::String
+  public var name: Swift::String
+  public var aeTitle: Swift::String
+  public var host: Swift::String
+  public var port: Swift::Int
+  public var usesTLS: Swift::Bool
+  public var acceptsSend: Swift::Bool
+  public var acceptsQuery: Swift::Bool
+  public static func == (a: IsiXPluginKit::IsiXDICOMNode, b: IsiXPluginKit::IsiXDICOMNode) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSendRequest : Swift::Hashable, Swift::Sendable {
+  public var studyInstanceUIDs: [Swift::String]
+  public var seriesInstanceUIDs: [Swift::String]
+  public var sopInstanceUIDs: [Swift::String]
+  public var files: [Foundation::URL]
+  public init(studyInstanceUIDs: [Swift::String] = [], seriesInstanceUIDs: [Swift::String] = [], sopInstanceUIDs: [Swift::String] = [], files: [Foundation::URL] = [])
+  public var isEmpty: Swift::Bool {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXSendRequest, b: IsiXPluginKit::IsiXSendRequest) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSendResult : Swift::Hashable, Swift::Sendable {
+  public var sent: Swift::Int
+  public var failed: Swift::Int
+  public var failureReason: Swift::String?
+  public static func == (a: IsiXPluginKit::IsiXSendResult, b: IsiXPluginKit::IsiXSendResult) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public enum IsiXQueryLevel : Swift::String, Swift::Hashable, Swift::Sendable {
+  case study
+  case series
+  case worklist
+  public init?(rawValue: Swift::String)
+  public typealias RawValue = Swift::String
+  public var rawValue: Swift::String {
+    get
+  }
+}
+public struct IsiXNetworkQuery : Swift::Hashable, Swift::Sendable {
+  public var level: IsiXPluginKit::IsiXQueryLevel
+  public var patientName: Swift::String?
+  public var patientID: Swift::String?
+  public var accessionNumber: Swift::String?
+  public var studyInstanceUID: Swift::String?
+  public var modality: Swift::String?
+  public var description: Swift::String?
+  public var dateFrom: Foundation::Date?
+  public var dateTo: Foundation::Date?
+  public var scheduledStationAETitle: Swift::String?
+  public var limit: Swift::Int?
+  public init(level: IsiXPluginKit::IsiXQueryLevel, patientName: Swift::String? = nil, patientID: Swift::String? = nil, accessionNumber: Swift::String? = nil, studyInstanceUID: Swift::String? = nil, modality: Swift::String? = nil, description: Swift::String? = nil, dateFrom: Foundation::Date? = nil, dateTo: Foundation::Date? = nil, scheduledStationAETitle: Swift::String? = nil, limit: Swift::Int? = nil)
+  public static func == (a: IsiXPluginKit::IsiXNetworkQuery, b: IsiXPluginKit::IsiXNetworkQuery) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXQueryMatch : Swift::Hashable, Swift::Sendable {
+  public var level: IsiXPluginKit::IsiXQueryLevel
+  public var values: [Swift::String : Swift::String]
+  public subscript(keyword: Swift::String) -> Swift::String? {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXQueryMatch, b: IsiXPluginKit::IsiXQueryMatch) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers final public class IsiXNetwork : Swift::Sendable {
+  final public func nodes() throws -> [IsiXPluginKit::IsiXDICOMNode]
+  final public func send(_ request: IsiXPluginKit::IsiXSendRequest, to nodeID: Swift::String) throws -> IsiXPluginKit::IsiXSendResult
+  final public func send(_ request: IsiXPluginKit::IsiXSendRequest, to nodeID: Swift::String) async throws -> IsiXPluginKit::IsiXSendResult
+  final public func find(_ query: IsiXPluginKit::IsiXNetworkQuery, on nodeID: Swift::String) throws -> [IsiXPluginKit::IsiXQueryMatch]
+  final public func find(_ query: IsiXPluginKit::IsiXNetworkQuery, on nodeID: Swift::String) async throws -> [IsiXPluginKit::IsiXQueryMatch]
+  @objc deinit
+}
+extension IsiXPluginKit::IsiXPluginContext {
+  @_Concurrency::MainActor final public func network() throws -> IsiXPluginKit::IsiXNetwork
+}
+public enum IsiXROIChange : Swift::Hashable, Swift::Sendable {
+  case added, modified, removed, selected
+  public static func == (a: IsiXPluginKit::IsiXROIChange, b: IsiXPluginKit::IsiXROIChange) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImagesAdded : Swift::Hashable, Swift::Sendable {
+  public var images: [IsiXPluginKit::IsiXDatabaseImage]
+  public var sopInstanceUIDsByCallingAETitle: [Swift::String : [Swift::String]]
+  public var isComplete: Swift::Bool
+  public static func == (a: IsiXPluginKit::IsiXImagesAdded, b: IsiXPluginKit::IsiXImagesAdded) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public enum IsiXEvent : Swift::Hashable, Swift::Sendable {
+  case viewerOpened(IsiXPluginKit::IsiXViewerID)
+  case viewerWillClose(IsiXPluginKit::IsiXViewerID)
+  case sliceChanged(IsiXPluginKit::IsiXViewerID, IsiXPluginKit::IsiXSlicePosition)
+  case roiChanged(IsiXPluginKit::IsiXViewerID, IsiXPluginKit::IsiXROIID, IsiXPluginKit::IsiXROIChange)
+  case imagesAdded(IsiXPluginKit::IsiXImagesAdded)
+  public var kind: IsiXPluginKit::IsiXEventKinds {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXEvent, b: IsiXPluginKit::IsiXEvent) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXEventKinds : Swift::OptionSet, Swift::Hashable, Swift::Sendable {
+  public let rawValue: Swift::UInt32
+  public init(rawValue: Swift::UInt32)
+  public static let viewerOpened: IsiXPluginKit::IsiXEventKinds
+  public static let viewerWillClose: IsiXPluginKit::IsiXEventKinds
+  public static let sliceChanged: IsiXPluginKit::IsiXEventKinds
+  public static let roiChanged: IsiXPluginKit::IsiXEventKinds
+  public static let imagesAdded: IsiXPluginKit::IsiXEventKinds
+  public static let all: IsiXPluginKit::IsiXEventKinds
+  public typealias ArrayLiteralElement = IsiXPluginKit::IsiXEventKinds
+  public typealias Element = IsiXPluginKit::IsiXEventKinds
+  public typealias RawValue = Swift::UInt32
+}
+@_hasMissingDesignatedInitializers final public class IsiXObservation : Swift::Sendable {
+  final public var isActive: Swift::Bool {
+    get
+  }
+  final public func invalidate()
+  @objc deinit
+}
+public struct IsiXViewerInput : Swift::Sendable {
+  public enum Kind : Swift::Hashable, Swift::Sendable {
+    case mouseDown
+    case mouseDragged
+    case mouseUp
+    case keyDown
+    public var kinds: IsiXPluginKit::IsiXInputKinds {
+      get
+    }
+    public static func == (a: IsiXPluginKit::IsiXViewerInput.IsiXPluginKit::Kind, b: IsiXPluginKit::IsiXViewerInput.IsiXPluginKit::Kind) -> Swift::Bool
+    public func hash(into hasher: inout Swift::Hasher)
+    public var hashValue: Swift::Int {
+      get
+    }
+  }
+  public let kind: IsiXPluginKit::IsiXViewerInput.IsiXPluginKit::Kind
+  public let viewerID: IsiXPluginKit::IsiXViewerID
+  public let position: IsiXPluginKit::IsiXSlicePosition
+  public let location: IsiXPluginKit::IsiXPixelPoint
+  public let locationInWindow: CoreFoundation::CGPoint
+  public let windowNumber: Swift::Int
+  public let modifierFlags: AppKit::NSEvent.AppKit::ModifierFlags
+  public let timestamp: Foundation::TimeInterval
+  public let clickCount: Swift::Int
+  public let characters: Swift::String?
+  public let keyCode: Swift::UInt16?
+  public init(kind: IsiXPluginKit::IsiXViewerInput.IsiXPluginKit::Kind, viewerID: IsiXPluginKit::IsiXViewerID, position: IsiXPluginKit::IsiXSlicePosition, location: IsiXPluginKit::IsiXPixelPoint, locationInWindow: CoreFoundation::CGPoint = .zero, windowNumber: Swift::Int = 0, modifierFlags: AppKit::NSEvent.AppKit::ModifierFlags = [], timestamp: Foundation::TimeInterval = 0, clickCount: Swift::Int = 0, characters: Swift::String? = nil, keyCode: Swift::UInt16? = nil)
+}
+public struct IsiXInputKinds : Swift::OptionSet, Swift::Hashable, Swift::Sendable {
+  public let rawValue: Swift::UInt32
+  public init(rawValue: Swift::UInt32)
+  public static let mouseDown: IsiXPluginKit::IsiXInputKinds
+  public static let mouseDragged: IsiXPluginKit::IsiXInputKinds
+  public static let mouseUp: IsiXPluginKit::IsiXInputKinds
+  public static let keyDown: IsiXPluginKit::IsiXInputKinds
+  public static let all: IsiXPluginKit::IsiXInputKinds
+  public typealias ArrayLiteralElement = IsiXPluginKit::IsiXInputKinds
+  public typealias Element = IsiXPluginKit::IsiXInputKinds
+  public typealias RawValue = Swift::UInt32
+}
+public struct IsiXOverlayContext {
+  public let cgContext: CoreGraphics::CGContext
+  public let viewerID: IsiXPluginKit::IsiXViewerID
+  public let position: IsiXPluginKit::IsiXSlicePosition
+  public let pointSize: CoreFoundation::CGFloat
+}
+extension IsiXPluginKit::IsiXViewer {
+  @_Concurrency::MainActor final public func addOverlay(_ draw: @escaping @_Concurrency::MainActor @Sendable (IsiXPluginKit::IsiXOverlayContext) -> Swift::Void) throws -> IsiXPluginKit::IsiXObservation
+}
+extension IsiXPluginKit::IsiXPluginContext {
+  @_Concurrency::MainActor final public func interceptInput(_ kinds: IsiXPluginKit::IsiXInputKinds = .all, _ handler: @escaping @_Concurrency::MainActor @Sendable (IsiXPluginKit::IsiXViewerInput) -> Swift::Bool) throws -> IsiXPluginKit::IsiXObservation
+}
+public struct IsiXVector3 : Swift::Hashable, Swift::Sendable {
+  public var x: Swift::Double
+  public var y: Swift::Double
+  public var z: Swift::Double
+  public init(x: Swift::Double, y: Swift::Double, z: Swift::Double)
+  public static func + (a: IsiXPluginKit::IsiXVector3, b: IsiXPluginKit::IsiXVector3) -> IsiXPluginKit::IsiXVector3
+  public static func - (a: IsiXPluginKit::IsiXVector3, b: IsiXPluginKit::IsiXVector3) -> IsiXPluginKit::IsiXVector3
+  public static func * (a: IsiXPluginKit::IsiXVector3, s: Swift::Double) -> IsiXPluginKit::IsiXVector3
+  public func dot(_ b: IsiXPluginKit::IsiXVector3) -> Swift::Double
+  public func cross(_ b: IsiXPluginKit::IsiXVector3) -> IsiXPluginKit::IsiXVector3
+  public var length: Swift::Double {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXVector3, b: IsiXPluginKit::IsiXVector3) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXPixelPoint : Swift::Hashable, Swift::Sendable {
+  public var x: Swift::Double
+  public var y: Swift::Double
+  public init(x: Swift::Double, y: Swift::Double)
+  public static func == (a: IsiXPluginKit::IsiXPixelPoint, b: IsiXPluginKit::IsiXPixelPoint) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImageGeometry : Swift::Hashable, Swift::Sendable {
+  public var columns: Swift::Int
+  public var rows: Swift::Int
+  public var columnSpacing: Swift::Double
+  public var rowSpacing: Swift::Double
+  public var imagePosition: IsiXPluginKit::IsiXVector3
+  public var rowDirection: IsiXPluginKit::IsiXVector3
+  public var columnDirection: IsiXPluginKit::IsiXVector3
+  public var sliceThickness: Swift::Double
+  public var sliceInterval: Swift::Double
+  public var sliceLocation: Swift::Double
+  public init(columns: Swift::Int, rows: Swift::Int, columnSpacing: Swift::Double, rowSpacing: Swift::Double, imagePosition: IsiXPluginKit::IsiXVector3, rowDirection: IsiXPluginKit::IsiXVector3, columnDirection: IsiXPluginKit::IsiXVector3, sliceThickness: Swift::Double, sliceInterval: Swift::Double, sliceLocation: Swift::Double)
+  public var imageOrientation: [Swift::Double] {
+    get
+  }
+  public var normal: IsiXPluginKit::IsiXVector3 {
+    get
+  }
+  public func patientPoint(of point: IsiXPluginKit::IsiXPixelPoint) -> IsiXPluginKit::IsiXVector3
+  public func pixelPoint(of point: IsiXPluginKit::IsiXVector3) -> IsiXPluginKit::IsiXPixelPoint
+  public func distanceFromPlane(_ point: IsiXPluginKit::IsiXVector3) -> Swift::Double
+  public static func == (a: IsiXPluginKit::IsiXImageGeometry, b: IsiXPluginKit::IsiXImageGeometry) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXPixelBuffer<Sample> : Swift::Sendable, Swift::Equatable where Sample : Swift::Equatable, Sample : Swift::Sendable {
+  public let width: Swift::Int
+  public let height: Swift::Int
+  public let channels: Swift::Int
+  public var samples: [Sample] {
+    get
+  }
+  public init(width: Swift::Int, height: Swift::Int, channels: Swift::Int = 1, samples: [Sample]) throws
+  public subscript(column: Swift::Int, row: Swift::Int, channel: Swift::Int = 0) -> Sample {
+    get
+    set
+  }
+  public func withUnsafeBufferPointer<R>(_ body: (Swift::UnsafeBufferPointer<Sample>) throws -> R) rethrows -> R
+  public mutating func withUnsafeMutableBufferPointer<R>(_ body: (inout Swift::UnsafeMutableBufferPointer<Sample>) throws -> R) rethrows -> R
+  public static func == (a: IsiXPluginKit::IsiXPixelBuffer<Sample>, b: IsiXPluginKit::IsiXPixelBuffer<Sample>) -> Swift::Bool
+}
+public enum IsiXPixelData : Swift::Sendable, Swift::Equatable {
+  case float32(IsiXPluginKit::IsiXPixelBuffer<Swift::Float>)
+  case rgba8(IsiXPluginKit::IsiXPixelBuffer<Swift::UInt8>)
+  public static func == (a: IsiXPluginKit::IsiXPixelData, b: IsiXPluginKit::IsiXPixelData) -> Swift::Bool
+}
+public struct IsiXImageVersion : Swift::Hashable, Swift::Sendable {
+  public let viewer: IsiXPluginKit::IsiXViewerID
+  public let slice: Swift::Int
+  public let phase: Swift::Int
+  public static func == (a: IsiXPluginKit::IsiXImageVersion, b: IsiXPluginKit::IsiXImageVersion) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImageAttributes : Swift::Hashable, Swift::Sendable {
+  public var modality: Swift::String?
+  public var studyInstanceUID: Swift::String?
+  public var seriesInstanceUID: Swift::String?
+  public var sopInstanceUID: Swift::String?
+  public var echoTime: Swift::Double?
+  public var repetitionTime: Swift::Double?
+  public var acquisitionDate: Foundation::Date?
+  public var rescaleSlope: Swift::Double
+  public var rescaleIntercept: Swift::Double
+  public var isSUV: Swift::Bool
+  public init(modality: Swift::String? = nil, studyInstanceUID: Swift::String? = nil, seriesInstanceUID: Swift::String? = nil, sopInstanceUID: Swift::String? = nil, echoTime: Swift::Double? = nil, repetitionTime: Swift::Double? = nil, acquisitionDate: Foundation::Date? = nil, rescaleSlope: Swift::Double = 1, rescaleIntercept: Swift::Double = 0, isSUV: Swift::Bool = false)
+  public static func == (a: IsiXPluginKit::IsiXImageAttributes, b: IsiXPluginKit::IsiXImageAttributes) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXImage : Swift::Sendable {
+  public let version: IsiXPluginKit::IsiXImageVersion
+  public let geometry: IsiXPluginKit::IsiXImageGeometry
+  public let attributes: IsiXPluginKit::IsiXImageAttributes
+  public let pixels: IsiXPluginKit::IsiXPixelData
+  public var viewerID: IsiXPluginKit::IsiXViewerID {
+    get
+  }
+  public var slice: Swift::Int {
+    get
+  }
+  public var phase: Swift::Int {
+    get
+  }
+  public var scalarPixels: IsiXPluginKit::IsiXPixelBuffer<Swift::Float>? {
+    get
+  }
+}
+public struct IsiXWindowLevel : Swift::Hashable, Swift::Sendable {
+  public var center: Swift::Double
+  public var width: Swift::Double
+  public init(center: Swift::Double, width: Swift::Double)
+  public static func == (a: IsiXPluginKit::IsiXWindowLevel, b: IsiXPluginKit::IsiXWindowLevel) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSeriesSummary : Swift::Hashable, Swift::Sendable {
+  public var sliceCount: Swift::Int
+  public var phaseCount: Swift::Int
+  public var currentSlice: Swift::Int
+  public var currentPhase: Swift::Int
+  public var studyInstanceUID: Swift::String?
+  public var seriesInstanceUID: Swift::String?
+  public var seriesDescription: Swift::String?
+  public var modality: Swift::String?
+  public static func == (a: IsiXPluginKit::IsiXSeriesSummary, b: IsiXPluginKit::IsiXSeriesSummary) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXDerivedImage : Swift::Sendable, Swift::Equatable {
+  public var sourceSlice: Swift::Int
+  public var sourcePhase: Swift::Int
+  public var pixels: IsiXPluginKit::IsiXPixelBuffer<Swift::Float>
+  public init(sourceSlice: Swift::Int, sourcePhase: Swift::Int = 0, pixels: IsiXPluginKit::IsiXPixelBuffer<Swift::Float>)
+  public static func == (a: IsiXPluginKit::IsiXDerivedImage, b: IsiXPluginKit::IsiXDerivedImage) -> Swift::Bool
+}
+public struct IsiXDerivedSeries : Swift::Sendable, Swift::Equatable {
+  public var images: [IsiXPluginKit::IsiXDerivedImage]
+  public var windowLevel: IsiXPluginKit::IsiXWindowLevel?
+  public init(images: [IsiXPluginKit::IsiXDerivedImage], windowLevel: IsiXPluginKit::IsiXWindowLevel? = nil)
+  public static func == (a: IsiXPluginKit::IsiXDerivedSeries, b: IsiXPluginKit::IsiXDerivedSeries) -> Swift::Bool
+}
+public let IsiXPluginAPIVersion: Swift::Int
+@_Concurrency::MainActor public protocol IsiXPlugin : AnyObject {
+  @_Concurrency::MainActor init()
+  @_Concurrency::MainActor func activate(with context: IsiXPluginKit::IsiXPluginContext) throws
+  @_Concurrency::MainActor func deactivate()
+}
+extension IsiXPluginKit::IsiXPlugin {
+  @_Concurrency::MainActor public func deactivate()
+}
+public struct IsiXCapability : Swift::RawRepresentable, Swift::Hashable, Swift::Sendable, Swift::CustomStringConvertible {
+  public let rawValue: Swift::String
+  public init(rawValue: Swift::String)
+  public var description: Swift::String {
+    get
+  }
+  public static let viewerRead: IsiXPluginKit::IsiXCapability
+  public static let viewerWrite: IsiXPluginKit::IsiXCapability
+  public static let roi: IsiXPluginKit::IsiXCapability
+  public static let databaseRead: IsiXPluginKit::IsiXCapability
+  public static let databaseImport: IsiXPluginKit::IsiXCapability
+  public static let databaseWrite: IsiXPluginKit::IsiXCapability
+  public static let networkSend: IsiXPluginKit::IsiXCapability
+  public static let networkQuery: IsiXPluginKit::IsiXCapability
+  public static let xmlRPC: IsiXPluginKit::IsiXCapability
+  public typealias RawValue = Swift::String
+}
+public struct IsiXPluginInfo : Swift::Sendable, Swift::Equatable {
+  public let identifier: Swift::String
+  public let name: Swift::String
+  public let version: Swift::String
+  public let bundleURL: Foundation::URL
+  public let capabilities: Swift::Set<IsiXPluginKit::IsiXCapability>
+  public static func == (a: IsiXPluginKit::IsiXPluginInfo, b: IsiXPluginKit::IsiXPluginInfo) -> Swift::Bool
+}
+public enum IsiXPluginError : Swift::Error, Swift::Sendable, Swift::Equatable {
+  case viewerClosed
+  case capabilityNotDeclared(IsiXPluginKit::IsiXCapability)
+  case pluginInactive
+  case sliceOutOfRange(Swift::Int)
+  case phaseOutOfRange(Swift::Int)
+  case staleImage
+  case dimensionMismatch
+  case roiNotFound
+  case unsupportedROIKind(IsiXPluginKit::IsiXROIKind)
+  case invalidROI(Swift::String)
+  case invalidCommand(Swift::String)
+  case commandAlreadyRegistered(Swift::String)
+  case noDatabase
+  case hostFailure(Swift::String)
+  case notFound(Swift::String)
+  case invalidValue(Swift::String)
+  case nodeNotConfigured(Swift::String)
+  case networkFailure(Swift::String)
+  public static func == (a: IsiXPluginKit::IsiXPluginError, b: IsiXPluginKit::IsiXPluginError) -> Swift::Bool
+}
+extension IsiXPluginKit::IsiXPluginError : Foundation::LocalizedError {
+  public var errorDescription: Swift::String? {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers @_Concurrency::MainActor final public class IsiXPluginContext {
+  @_Concurrency::MainActor final public let info: IsiXPluginKit::IsiXPluginInfo
+  @_Concurrency::MainActor final public let bundle: Foundation::Bundle
+  @_Concurrency::MainActor final public func register(_ command: IsiXPluginKit::IsiXCommand, handler: @escaping @_Concurrency::MainActor @Sendable (IsiXPluginKit::IsiXCommandInvocation) throws -> Swift::Void) throws
+  @_Concurrency::MainActor final public func unregisterCommand(id: Swift::String)
+  @_Concurrency::MainActor final public func frontmostViewer() throws -> IsiXPluginKit::IsiXViewer?
+  @_Concurrency::MainActor final public func openViewers() throws -> [IsiXPluginKit::IsiXViewer]
+  @_Concurrency::MainActor final public func viewer(withID id: IsiXPluginKit::IsiXViewerID) throws -> IsiXPluginKit::IsiXViewer?
+  @_Concurrency::MainActor final public func observe(_ kinds: IsiXPluginKit::IsiXEventKinds = .all, _ handler: @escaping @_Concurrency::MainActor @Sendable (IsiXPluginKit::IsiXEvent) -> Swift::Void) throws -> IsiXPluginKit::IsiXObservation
+  @_Concurrency::MainActor final public func database() throws -> IsiXPluginKit::IsiXDatabase
+  @discardableResult
+  @_Concurrency::MainActor final public func startTask(named name: Swift::String, _ operation: @escaping @Sendable (IsiXPluginKit::IsiXTaskProgress) async throws -> Swift::Void) throws -> IsiXPluginKit::IsiXTask
+  @objc deinit
+}
+public struct IsiXROIID : Swift::Hashable, Swift::Sendable, Swift::CustomStringConvertible {
+  public let rawValue: Foundation::UUID
+  public var description: Swift::String {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXROIID, b: IsiXPluginKit::IsiXROIID) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public enum IsiXROIKind : Swift::Hashable, Swift::Sendable {
+  case point
+  case line
+  case rectangle
+  case oval
+  case polygon
+  case polyline
+  case angle
+  case text
+  case brush
+  case other
+  public static func == (a: IsiXPluginKit::IsiXROIKind, b: IsiXPluginKit::IsiXROIKind) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXROI : Swift::Hashable, Swift::Sendable {
+  public var id: IsiXPluginKit::IsiXROIID
+  public var kind: IsiXPluginKit::IsiXROIKind
+  public var name: Swift::String
+  public var comment: Swift::String
+  public var slice: Swift::Int
+  public var phase: Swift::Int
+  public var points: [IsiXPluginKit::IsiXPixelPoint]
+  public var patientPoints: [IsiXPluginKit::IsiXVector3]
+  public var isSelected: Swift::Bool
+  public var showsTextBox: Swift::Bool
+  public static func == (a: IsiXPluginKit::IsiXROI, b: IsiXPluginKit::IsiXROI) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXROIUpdate : Swift::Hashable, Swift::Sendable {
+  public var points: [IsiXPluginKit::IsiXPixelPoint]?
+  public var kind: IsiXPluginKit::IsiXROIKind?
+  public var name: Swift::String?
+  public var comment: Swift::String?
+  public var isSelected: Swift::Bool?
+  public var showsTextBox: Swift::Bool?
+  public init(points: [IsiXPluginKit::IsiXPixelPoint]? = nil, kind: IsiXPluginKit::IsiXROIKind? = nil, name: Swift::String? = nil, comment: Swift::String? = nil, isSelected: Swift::Bool? = nil, showsTextBox: Swift::Bool? = nil)
+  public static func == (a: IsiXPluginKit::IsiXROIUpdate, b: IsiXPluginKit::IsiXROIUpdate) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXROIMask : Swift::Hashable, Swift::Sendable {
+  public let width: Swift::Int
+  public let height: Swift::Int
+  public let column: Swift::Int
+  public let row: Swift::Int
+  public let values: [Swift::UInt8]
+  public init(width: Swift::Int, height: Swift::Int, column: Swift::Int = 0, row: Swift::Int = 0, values: [Swift::UInt8]) throws
+  public var count: Swift::Int {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXROIMask, b: IsiXPluginKit::IsiXROIMask) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXROIDraft : Swift::Hashable, Swift::Sendable {
+  public var kind: IsiXPluginKit::IsiXROIKind
+  public var points: [IsiXPluginKit::IsiXPixelPoint]
+  public var name: Swift::String?
+  public var slice: Swift::Int?
+  public var phase: Swift::Int?
+  public var mask: IsiXPluginKit::IsiXROIMask?
+  public init(kind: IsiXPluginKit::IsiXROIKind, points: [IsiXPluginKit::IsiXPixelPoint], name: Swift::String? = nil, slice: Swift::Int? = nil, phase: Swift::Int? = nil)
+  public init(mask: IsiXPluginKit::IsiXROIMask, name: Swift::String? = nil, slice: Swift::Int? = nil, phase: Swift::Int? = nil)
+  public static func == (a: IsiXPluginKit::IsiXROIDraft, b: IsiXPluginKit::IsiXROIDraft) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXROIStatistics : Swift::Hashable, Swift::Sendable {
+  public var mean: Swift::Double
+  public var standardDeviation: Swift::Double
+  public var minimum: Swift::Double
+  public var maximum: Swift::Double
+  public var sum: Swift::Double
+  public var area: Swift::Double?
+  public var length: Swift::Double?
+  public static func == (a: IsiXPluginKit::IsiXROIStatistics, b: IsiXPluginKit::IsiXROIStatistics) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXViewerID : Swift::Hashable, Swift::Sendable, Swift::CustomStringConvertible {
+  public let rawValue: Foundation::UUID
+  public var description: Swift::String {
+    get
+  }
+  public static func == (a: IsiXPluginKit::IsiXViewerID, b: IsiXPluginKit::IsiXViewerID) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+public struct IsiXSlicePosition : Swift::Hashable, Swift::Sendable {
+  public var slice: Swift::Int
+  public var phase: Swift::Int
+  public init(slice: Swift::Int, phase: Swift::Int)
+  public static func == (a: IsiXPluginKit::IsiXSlicePosition, b: IsiXPluginKit::IsiXSlicePosition) -> Swift::Bool
+  public func hash(into hasher: inout Swift::Hasher)
+  public var hashValue: Swift::Int {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers @_Concurrency::MainActor final public class IsiXViewer {
+  nonisolated final public let id: IsiXPluginKit::IsiXViewerID
+  @_Concurrency::MainActor final public var isOpen: Swift::Bool {
+    get
+  }
+  @_Concurrency::MainActor final public func series() throws -> IsiXPluginKit::IsiXSeriesSummary
+  @_Concurrency::MainActor final public func currentPosition() throws -> IsiXPluginKit::IsiXSlicePosition
+  @_Concurrency::MainActor final public func setCurrentSlice(_ slice: Swift::Int) throws
+  @_Concurrency::MainActor final public func setCurrentPhase(_ phase: Swift::Int) throws
+  @_Concurrency::MainActor final public func image(slice: Swift::Int? = nil, phase: Swift::Int? = nil) throws -> IsiXPluginKit::IsiXImage
+  @_Concurrency::MainActor final public func geometry(slice: Swift::Int? = nil, phase: Swift::Int? = nil) throws -> IsiXPluginKit::IsiXImageGeometry
+  @_Concurrency::MainActor final public func attributes(slice: Swift::Int? = nil, phase: Swift::Int? = nil) throws -> IsiXPluginKit::IsiXImageAttributes
+  @_Concurrency::MainActor final public func windowLevel() throws -> IsiXPluginKit::IsiXWindowLevel
+  @_Concurrency::MainActor final public func setWindowLevel(_ windowLevel: IsiXPluginKit::IsiXWindowLevel) throws
+  @_Concurrency::MainActor final public func commit(_ pixels: IsiXPluginKit::IsiXPixelData, replacing image: IsiXPluginKit::IsiXImage) throws
+  @_Concurrency::MainActor final public func openDerivedSeries(_ series: IsiXPluginKit::IsiXDerivedSeries) throws -> IsiXPluginKit::IsiXViewer
+  @_Concurrency::MainActor final public func rois(slice: Swift::Int? = nil, phase: Swift::Int? = nil) throws -> [IsiXPluginKit::IsiXROI]
+  @_Concurrency::MainActor final public func addROI(_ draft: IsiXPluginKit::IsiXROIDraft) throws -> IsiXPluginKit::IsiXROI
+  @_Concurrency::MainActor final public func removeROI(_ id: IsiXPluginKit::IsiXROIID) throws
+  @discardableResult
+  @_Concurrency::MainActor final public func updateROI(_ id: IsiXPluginKit::IsiXROIID, _ update: IsiXPluginKit::IsiXROIUpdate) throws -> IsiXPluginKit::IsiXROI
+  @_Concurrency::MainActor final public func statistics(of id: IsiXPluginKit::IsiXROIID) throws -> IsiXPluginKit::IsiXROIStatistics
+  @_Concurrency::MainActor final public func statistics(of id: IsiXPluginKit::IsiXROIID, slice: Swift::Int, phase: Swift::Int) throws -> IsiXPluginKit::IsiXROIStatistics
+  @_Concurrency::MainActor final public func setNeedsDisplay()
+  @objc deinit
+}
+extension IsiXPluginKit::IsiXCommandInvocation : Swift::Sendable {}
+extension IsiXPluginKit::IsiXTask : Swift::Sendable {}
+extension IsiXPluginKit::IsiXDatabase : Swift::Sendable {}
+extension IsiXPluginKit::IsiXPluginContext : Swift::Sendable {}
+extension IsiXPluginKit::IsiXQueryLevel : Swift::RawRepresentable {}
+extension IsiXPluginKit::IsiXViewer : Swift::Sendable {}

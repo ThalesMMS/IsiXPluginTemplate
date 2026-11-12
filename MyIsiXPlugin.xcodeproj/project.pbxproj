@@ -1,0 +1,234 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXFileReference section */
+		81D66BF6C4C394E1D894958E /* MyIsiXPlugin.isixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyIsiXPlugin.isixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7DDCBEE195637990D67DDEF /* SDK.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = SDK.xcconfig; sourceTree = "<group>"; };
+		B6C3FDF7043EAC042A58A9A2 /* MyIsiXPlugin.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MyIsiXPlugin.xcconfig; sourceTree = "<group>"; };
+		FB927D93CFC063EB2EF4A44F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		921C20CE463DC1798A31E653 /* MyIsiXPlugin */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MyIsiXPlugin;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		70CD7651FAE7817FB52F8064 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6CFEC8BA0CD7CEC4E9C1A7BD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				81D66BF6C4C394E1D894958E /* MyIsiXPlugin.isixplugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7461372AE1B311C7B67D16E3 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				B6C3FDF7043EAC042A58A9A2 /* MyIsiXPlugin.xcconfig */,
+				A7DDCBEE195637990D67DDEF /* SDK.xcconfig */,
+				FB927D93CFC063EB2EF4A44F /* Info.plist */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		CD9CEB42E10D44A72592AA16 = {
+			isa = PBXGroup;
+			children = (
+				921C20CE463DC1798A31E653 /* MyIsiXPlugin */,
+				7461372AE1B311C7B67D16E3 /* Config */,
+				6CFEC8BA0CD7CEC4E9C1A7BD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		659218901F22BA3EFBAD5065 /* MyIsiXPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17C898EDA608A004DF3E9BD3 /* Build configuration list for PBXNativeTarget "MyIsiXPlugin" */;
+			buildPhases = (
+				E4ED561AE700462D60ADF46A /* Check IsiXPluginKit SDK */,
+				B44870B45923722FDD1882BD /* Sources */,
+				70CD7651FAE7817FB52F8064 /* Frameworks */,
+				224905E5DD2278C8DEE0BB7B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				921C20CE463DC1798A31E653 /* MyIsiXPlugin */,
+			);
+			name = MyIsiXPlugin;
+			productName = MyIsiXPlugin;
+			productReference = 81D66BF6C4C394E1D894958E /* MyIsiXPlugin.isixplugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E59E08C8CA292B3AEB0AC7E2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					659218901F22BA3EFBAD5065 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+				};
+			};
+			buildConfigurationList = 4D18E9441B8015B5FF84FA91 /* Build configuration list for PBXProject "MyIsiXPlugin" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CD9CEB42E10D44A72592AA16;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6CFEC8BA0CD7CEC4E9C1A7BD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				659218901F22BA3EFBAD5065 /* MyIsiXPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		224905E5DD2278C8DEE0BB7B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E4ED561AE700462D60ADF46A /* Check IsiXPluginKit SDK */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(PROJECT_DIR)/script/sdk.py",
+				"$(PROJECT_DIR)/Config/Info.plist",
+				"$(ISIX_SDK_DIR)/SDK.json",
+				"$(ISIX_SDK_DIR)/IsiXPluginKit.framework/Versions/A/IsiXPluginKit",
+			);
+			name = "Check IsiXPluginKit SDK";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/IsiXPluginKitSDK.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Fails the build, with the reason, unless ISIX_SDK_DIR holds an IsiXPluginKit SDK\n# for plugin API version 1 with the architectures being built, and records\n# which SDK the plugin was built against inside the bundle.\nexec /usr/bin/python3 \"${PROJECT_DIR}/script/sdk.py\" check --sdk \"${ISIX_SDK_DIR}\" --archs \"${ARCHS}\" --record \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/IsiXPluginKitSDK.json\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B44870B45923722FDD1882BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C5F4EF93F26AD3ECC8D59015 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		252AB40ACD207BBF1F8A684E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		6180FD116926DB12E84D8FB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B6C3FDF7043EAC042A58A9A2 /* MyIsiXPlugin.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		057117E12592E946342E1566 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B6C3FDF7043EAC042A58A9A2 /* MyIsiXPlugin.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4D18E9441B8015B5FF84FA91 /* Build configuration list for PBXProject "MyIsiXPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C5F4EF93F26AD3ECC8D59015 /* Debug */,
+				252AB40ACD207BBF1F8A684E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		17C898EDA608A004DF3E9BD3 /* Build configuration list for PBXNativeTarget "MyIsiXPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6180FD116926DB12E84D8FB5 /* Debug */,
+				057117E12592E946342E1566 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E59E08C8CA292B3AEB0AC7E2 /* Project object */;
+}

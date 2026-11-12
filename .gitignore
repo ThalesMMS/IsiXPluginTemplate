@@ -1,0 +1,9 @@
+.DS_Store
+# Build products, the isolated test root of script/run-isolated.sh and Xcode state.
+/build/
+xcuserdata/
+*.xcuserstate
+# Per-machine overrides, such as another SDK folder.
+/Config/SDK.local.xcconfig
+# Libraries built by script/build-library.py for the plugin to carry.
+/Libraries/
