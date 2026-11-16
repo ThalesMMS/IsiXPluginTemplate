@@ -15,6 +15,7 @@ public struct IsiXCommand : Swift::Hashable, Swift::Sendable {
     case roiTools
     case database
     case other
+    case report
     public static func == (a: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement, b: IsiXPluginKit::IsiXCommand.IsiXPluginKit::Placement) -> Swift::Bool
     public func hash(into hasher: inout Swift::Hasher)
     public var hashValue: Swift::Int {
@@ -687,6 +688,7 @@ public struct IsiXCapability : Swift::RawRepresentable, Swift::Hashable, Swift::
   public static let networkSend: IsiXPluginKit::IsiXCapability
   public static let networkQuery: IsiXPluginKit::IsiXCapability
   public static let xmlRPC: IsiXPluginKit::IsiXCapability
+  public static let report: IsiXPluginKit::IsiXCapability
   public typealias RawValue = Swift::String
 }
 public struct IsiXPluginInfo : Swift::Sendable, Swift::Equatable {

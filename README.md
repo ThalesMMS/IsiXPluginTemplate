@@ -37,17 +37,17 @@ The SDK is a folder with `IsiXPluginKit.framework` (the binary to link and one
 version, kit version and source revision it is and records the SHA-256 of the
 binary and of each interface. The project looks for it in `SDK/`.
 
-This repository includes the SDK of **IsiX DICOM Viewer 6.0.0**, as published
-with that release in `IsiXPluginKit-SDK-6.0.0.zip`:
+This repository includes the SDK of **IsiX DICOM Viewer 6.0.4**, as published
+with that release in `IsiXPluginKit-SDK-6.0.4.zip`:
 
 | | |
 |---|---|
 | Plugin API version | 1 |
 | Kit version | 1.0.0 |
-| Source revision | `3d4e52fd9631f2d0783d6c727c4cedbc9900c1da` (tag `v6.0.0` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
+| Source revision | `087f2cd0f721a21f17840b911186fcd22a320160` (tag `v6.0.4` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
 | Architectures | `arm64`, `x86_64` |
-| SHA-256 of the binary | `56f796e41f265c5b8b0703e28740d3ad32490a825011c54f3e0390fbf9f25b02` |
-| SHA-256 of `IsiXPluginKit-SDK-6.0.0.zip` | `89da5b1c51f9a4b4697b157d86c37252a0deb5ddbe9f8a9477b1a69b0ab53fef` |
+| SHA-256 of the binary | `6635787f8efab6ef277c70ec748790e957cda95d22ffc20bdfbf046eb1196712` |
+| SHA-256 of `IsiXPluginKit-SDK-6.0.4.zip` | `f81a1a7e46ef1b01f9379ff6e85ec2d119beefc4cc07679f9d5d23cc87513b4b` |
 
 Nothing needs to be downloaded to build the example: `script/sdk.py check`
 confirms that what is in `SDK/` is that SDK.
@@ -156,10 +156,15 @@ Capabilities:
 | String | Gives |
 | --- | --- |
 | `viewer.read` | viewers, their series, images, geometry and pixels; viewer events |
-| `viewer.write` | committing pixels; setting the window level |
+| `viewer.write` | committing pixels; setting the window level; opening a derived series in a new viewer |
 | `roi` | reading, creating, measuring and removing ROIs; ROI events |
-| `database.read` | studies and series of the local database |
-| `database.import` | importing files into the local database |
+| `database.read` | studies, series, images (with their files) and albums of the local database; searching it; opening a series in a viewer |
+| `database.write` | what the user edits: comments, state and report of studies and series, key images; creating albums and changing their studies |
+| `database.import` | writing derived DICOM files of a study; importing files into the local database |
+| `network.send` | the DICOM nodes of Locations with Send on; sending images of the database and DICOM files to them |
+| `network.query` | the DICOM nodes of Locations with Query/Retrieve on; C-FIND of studies, series and the modality worklist |
+| `xmlrpc` | XML-RPC methods of the plugin's own, answered through the application's XML-RPC interface |
+| `report` | commands in the Report menu of the application's plugins (`IsiXCommand.Placement.report`); applications after 6.0.3 |
 
 A call that needs a capability the plugin did not declare throws
 `IsiXPluginError.capabilityNotDeclared`.
@@ -186,6 +191,11 @@ The code is in `MyIsiXPlugin/Sources`:
 Things worth knowing when you change it:
 
 - **Commands** are identified by their `id`; the title is only shown. A command
+  registered with `placement: .report` goes in Plugins > Report. It needs the
+  SDK of IsiX 6.0.4 or later in `SDK/` and the `report` capability. The
+  template does not declare it: an application up to
+  6.0.3 refuses a plugin that does, before loading it, and says which
+  capability it lacks. A command
   with `requirement: .viewer` is disabled while no 2D viewer is open, and its
   invocation carries the frontmost viewer and a window to attach sheets to. An
   error the handler throws is shown to the user, with its description.
