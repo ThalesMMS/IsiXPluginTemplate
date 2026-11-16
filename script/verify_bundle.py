@@ -25,7 +25,13 @@ import sys
 
 API_VERSION = 1
 KIT = '@rpath/IsiXPluginKit.framework/Versions/A/IsiXPluginKit'
-CAPABILITIES = {'viewer.read', 'viewer.write', 'roi', 'database.read', 'database.import'}
+# The capabilities a version 1 application knows, as SDK/README.md lists them.
+CAPABILITIES = {'viewer.read', 'viewer.write', 'roi', 'database.read', 'database.write', 'database.import',
+                'network.send', 'network.query', 'xmlrpc', 'report'}
+# The ones that came after the first version 1 applications, with the last
+# version that does not know each: that application and the earlier ones refuse
+# a plugin that declares it.
+LATER_CAPABILITIES = {'report': '6.0.3'}
 LEGACY_KEYS = {'pluginType', 'MenuTitles', 'ToolbarNames', 'FileFormats', 'HorosCompatiblePlugin', 'Requirements'}
 LEGACY_FRAMEWORKS = re.compile(r'/(Horos|HorosAPI|OsiriXAPI|OsiriX Headers|OsiriX|HorosDCM)\.framework/')
 MINIMUM_SYSTEM = (15, 0)
@@ -87,6 +93,10 @@ def inspect(bundle, archs=()):
         problems.append('IsiXPluginCapabilities must be an array of strings')
     elif set(capabilities) - CAPABILITIES:
         problems.append(f'unknown capabilities: {", ".join(sorted(set(capabilities) - CAPABILITIES))}')
+    else:
+        for capability in sorted(set(capabilities) & set(LATER_CAPABILITIES)):
+            warnings.append(f'the capability {capability} needs an application after {LATER_CAPABILITIES[capability]}: '
+                            'that version and the earlier ones refuse the plugin')
     minimum = info.get('LSMinimumSystemVersion')
     if minimum and version_tuple(minimum) > MINIMUM_SYSTEM:
         warnings.append(f'LSMinimumSystemVersion {minimum} is above macOS 15: older systems refuse the plugin')

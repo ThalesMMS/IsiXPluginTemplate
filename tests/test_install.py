@@ -13,8 +13,10 @@ Exits with 2, skipped, when there is no built bundle.
 from pathlib import Path
 import argparse
 import hashlib
+import json
 import os
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
@@ -157,6 +159,34 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 3)
         self.assertIn('signature', result.stderr)
         self.assertEqual(self.leftovers(), [])
+
+    def test_the_check_knows_every_capability_of_the_plugin_api(self):
+        """script/verify_bundle.py, which the build and the installer run, accepts the capabilities the SDK documents."""
+        sys.path.insert(0, str(PROJECT / 'script'))
+        import verify_bundle
+        documented = PROJECT / 'SDK' / 'README.md'
+        if documented.is_file():
+            table = set(re.findall(r'^\| `([a-z.]+)` \| ', documented.read_text().split('## Capabilities', 1)[-1].split('\n## ', 1)[0], re.M))
+            self.assertEqual(table, verify_bundle.CAPABILITIES, 'the check and SDK/README.md list other capabilities')
+
+        def checked(name, capabilities):
+            done = subprocess.run([sys.executable, str(PROJECT / 'script' / 'verify_bundle.py'), '--json',
+                                   str(self.made(name, IsiXPluginCapabilities=capabilities))], capture_output=True, text=True)
+            return done.returncode, json.loads(done.stdout)
+
+        for capability in sorted(verify_bundle.CAPABILITIES):
+            with self.subTest(capability):
+                code, found = checked(capability, ['viewer.read', capability])
+                self.assertEqual((code, found['problems']), (0, []))
+                later = [w for w in found['warnings'] if 'needs an application after' in w]
+                self.assertEqual(bool(later), capability in verify_bundle.LATER_CAPABILITIES, found['warnings'])
+        code, found = checked('unknown', ['viewer.read', 'time.travel'])
+        self.assertNotEqual(code, 0)
+        self.assertIn('unknown capabilities: time.travel', found['problems'])
+        # The installer refuses what the check refuses, and takes what it accepts.
+        self.assertEqual(self.run_install('install', str(self.made('refused', IsiXPluginCapabilities=['time.travel']))).returncode, 3)
+        result = self.run_install('install', str(self.made('report', IsiXPluginCapabilities=['viewer.read', 'roi', 'report'])))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_interrupted_before_publishing_leaves_the_old_version(self):
         self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
