@@ -2,7 +2,7 @@
   "name": "IsiXPluginKit",
   "apiVersion": 1,
   "kitVersion": "1.0.0",
-  "revision": "087f2cd0f721a21f17840b911186fcd22a320160",
+  "revision": "4224dfa7b36b5053d0b08ff19c6c70a09c442676",
   "configuration": "Release",
   "architectures": [
     "x86_64",

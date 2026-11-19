@@ -37,17 +37,17 @@ The SDK is a folder with `IsiXPluginKit.framework` (the binary to link and one
 version, kit version and source revision it is and records the SHA-256 of the
 binary and of each interface. The project looks for it in `SDK/`.
 
-This repository includes the SDK of **IsiX DICOM Viewer 6.0.4**, as published
-with that release in `IsiXPluginKit-SDK-6.0.4.zip`:
+This repository includes the SDK of **IsiX DICOM Viewer 6.0.5**, as published
+with that release in `IsiXPluginKit-SDK-6.0.5.zip`:
 
 | | |
 |---|---|
 | Plugin API version | 1 |
 | Kit version | 1.0.0 |
-| Source revision | `087f2cd0f721a21f17840b911186fcd22a320160` (tag `v6.0.4` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
+| Source revision | `4224dfa7b36b5053d0b08ff19c6c70a09c442676` (tag `v6.0.5` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
 | Architectures | `arm64`, `x86_64` |
 | SHA-256 of the binary | `6635787f8efab6ef277c70ec748790e957cda95d22ffc20bdfbf046eb1196712` |
-| SHA-256 of `IsiXPluginKit-SDK-6.0.4.zip` | `f81a1a7e46ef1b01f9379ff6e85ec2d119beefc4cc07679f9d5d23cc87513b4b` |
+| SHA-256 of `IsiXPluginKit-SDK-6.0.5.zip` | `eb52313e39592ea949efabc23ba9b9a6a600b41cd15acf8b1acd0ae49bcb16b2` |
 
 Nothing needs to be downloaded to build the example: `script/sdk.py check`
 confirms that what is in `SDK/` is that SDK.
