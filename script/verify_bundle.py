@@ -27,11 +27,11 @@ API_VERSION = 1
 KIT = '@rpath/IsiXPluginKit.framework/Versions/A/IsiXPluginKit'
 # The capabilities a version 1 application knows, as SDK/README.md lists them.
 CAPABILITIES = {'viewer.read', 'viewer.write', 'roi', 'database.read', 'database.write', 'database.import',
-                'network.send', 'network.query', 'xmlrpc', 'report'}
+                'network.send', 'network.query', 'xmlrpc', 'report', 'viewer.4d'}
 # The ones that came after the first version 1 applications, with the last
 # version that does not know each: that application and the earlier ones refuse
 # a plugin that declares it.
-LATER_CAPABILITIES = {'report': '6.0.3'}
+LATER_CAPABILITIES = {'report': '6.0.3', 'viewer.4d': '6.0.7'}
 LEGACY_KEYS = {'pluginType', 'MenuTitles', 'ToolbarNames', 'FileFormats', 'HorosCompatiblePlugin', 'Requirements'}
 LEGACY_FRAMEWORKS = re.compile(r'/(Horos|HorosAPI|OsiriXAPI|OsiriX Headers|OsiriX|HorosDCM)\.framework/')
 MINIMUM_SYSTEM = (15, 0)

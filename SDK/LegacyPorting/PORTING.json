@@ -77,11 +77,11 @@
     "IsiXLegacyBridge/Sources/IsiXLegacyViewerEvents.swift": "5938e1f86f3ea652760cd2f8dc1f074712da98f28a607948a0d36f2aaaaf4cd6",
     "IsiXLegacyBridge/Sources/IsiXLegacyViewerExport.m": "6e3edfec44906e9952b3557470d24ce721d4da30088bd2e0d31023e16bd1ad9f",
     "IsiXLegacyBridge/Sources/IsiXLegacyViewerSession.swift": "47d1d7c40f2cd49920d8745fe716499f16e9d70acf6e7572bad79fdb38338343",
-    "IsiXPluginKit/README.md": "b01f5e8303b25ab0c49534dde7ee5e371624db5dac33b6138cd84b8c5c02c3a5",
+    "IsiXPluginKit/README.md": "7960c3a7e41c769f0d8d4f3ee8586311e21dfb787c2dcb470c7e571f7f6f497c",
     "LICENSE": "70521672191f77f1d0a5b487115a7333b728aba3313e3df9209ad95cf8a3dcc6",
     "tools/build-isix-legacy-plugin.py": "1804e956f3a12ccc45ddc094367912c3f19be1e244be9cc9786f958a39d0a203",
     "tools/inventory-plugin-api.py": "74c5c8d139b2fc78b8adf9a1a9d93686ca291b92889ecf717f8d8ad68f905064",
     "tools/port-legacy-plugin.py": "4d43ecf191f00ac2e8ca9a9bce22e9b2d09606d3a16c7ecd2aebb77656463b58"
   },
-  "revision": "4224dfa7b36b5053d0b08ff19c6c70a09c442676"
+  "revision": "97a64c7fb7ddaaa11829b86e29040674dc26844e"
 }

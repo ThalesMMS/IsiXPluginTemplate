@@ -166,7 +166,7 @@ class InstallTests(unittest.TestCase):
         import verify_bundle
         documented = PROJECT / 'SDK' / 'README.md'
         if documented.is_file():
-            table = set(re.findall(r'^\| `([a-z.]+)` \| ', documented.read_text().split('## Capabilities', 1)[-1].split('\n## ', 1)[0], re.M))
+            table = set(re.findall(r'^\| `([a-z0-9.]+)` \| ', documented.read_text().split('## Capabilities', 1)[-1].split('\n## ', 1)[0], re.M))
             self.assertEqual(table, verify_bundle.CAPABILITIES, 'the check and SDK/README.md list other capabilities')
 
         def checked(name, capabilities):

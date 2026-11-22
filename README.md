@@ -37,17 +37,17 @@ The SDK is a folder with `IsiXPluginKit.framework` (the binary to link and one
 version, kit version and source revision it is and records the SHA-256 of the
 binary and of each interface. The project looks for it in `SDK/`.
 
-This repository includes the SDK of **IsiX DICOM Viewer 6.0.5**, as published
-with that release in `IsiXPluginKit-SDK-6.0.5.zip`:
+This repository includes the SDK of **IsiX DICOM Viewer 6.0.8**, as published
+with that release in `IsiXPluginKit-SDK-6.0.8.zip`:
 
 | | |
 |---|---|
 | Plugin API version | 1 |
 | Kit version | 1.0.0 |
-| Source revision | `4224dfa7b36b5053d0b08ff19c6c70a09c442676` (tag `v6.0.5` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
+| Source revision | `97a64c7fb7ddaaa11829b86e29040674dc26844e` (tag `v6.0.8` of [IsiX-DICOM-Viewer-macOS](https://github.com/ThalesMMS/IsiX-DICOM-Viewer-macOS)) |
 | Architectures | `arm64`, `x86_64` |
-| SHA-256 of the binary | `6635787f8efab6ef277c70ec748790e957cda95d22ffc20bdfbf046eb1196712` |
-| SHA-256 of `IsiXPluginKit-SDK-6.0.5.zip` | `eb52313e39592ea949efabc23ba9b9a6a600b41cd15acf8b1acd0ae49bcb16b2` |
+| SHA-256 of the binary | `7ba0a58916a2953096470c2dbac9e347b0c668ff31f34ed5ce1e41f7626c1e48` |
+| SHA-256 of `IsiXPluginKit-SDK-6.0.8.zip` | `fa22e5cf21890e9e1dc75e7de676e563794b117b5f6d852e24f4bd494c1c6d32` |
 
 Nothing needs to be downloaded to build the example: `script/sdk.py check`
 confirms that what is in `SDK/` is that SDK.
@@ -165,6 +165,7 @@ Capabilities:
 | `network.query` | the DICOM nodes of Locations with Query/Retrieve on; C-FIND of studies, series and the modality worklist |
 | `xmlrpc` | XML-RPC methods of the plugin's own, answered through the application's XML-RPC interface |
 | `report` | commands in the Report menu of the application's plugins (`IsiXCommand.Placement.report`); applications after 6.0.3 |
+| `viewer.4d` | opening several series of the database together in one viewer, each a phase (`IsiXDatabase.open4DViewer(forSeries:)`, with `database.read`); applications after 6.0.7 |
 
 A call that needs a capability the plugin did not declare throws
 `IsiXPluginError.capabilityNotDeclared`.

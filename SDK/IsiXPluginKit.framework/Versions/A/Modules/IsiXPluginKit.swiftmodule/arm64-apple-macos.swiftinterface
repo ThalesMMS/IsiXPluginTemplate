@@ -267,6 +267,8 @@ extension IsiXPluginKit::IsiXDatabase {
   @discardableResult
   @_Concurrency::MainActor final public func openViewer(forSeries seriesInstanceUID: Swift::String) throws -> IsiXPluginKit::IsiXViewer?
   @discardableResult
+  @_Concurrency::MainActor final public func open4DViewer(forSeries seriesInstanceUIDs: [Swift::String]) throws -> IsiXPluginKit::IsiXViewer?
+  @discardableResult
   @_Concurrency::MainActor final public func updateStudy(_ studyInstanceUID: Swift::String, _ update: IsiXPluginKit::IsiXStudyUpdate) throws -> IsiXPluginKit::IsiXStudy
   @discardableResult
   @_Concurrency::MainActor final public func updateSeries(_ seriesInstanceUID: Swift::String, _ update: IsiXPluginKit::IsiXSeriesUpdate) throws -> IsiXPluginKit::IsiXSeries
@@ -689,6 +691,7 @@ public struct IsiXCapability : Swift::RawRepresentable, Swift::Hashable, Swift::
   public static let networkQuery: IsiXPluginKit::IsiXCapability
   public static let xmlRPC: IsiXPluginKit::IsiXCapability
   public static let report: IsiXPluginKit::IsiXCapability
+  public static let viewer4D: IsiXPluginKit::IsiXCapability
   public typealias RawValue = Swift::String
 }
 public struct IsiXPluginInfo : Swift::Sendable, Swift::Equatable {
