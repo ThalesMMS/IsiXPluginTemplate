@@ -452,6 +452,16 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 8)
         self.assertEqual(self.leftovers(), [staging.name], 'the folder decided on is left as it is')
 
+    def test_restore_and_uninstall_stop_when_there_is_no_plugins_folder(self):
+        shutil.rmtree(self.other)
+        self.sentinels.pop(self.other)
+        self.folder.rmdir()
+        for command in (['restore'], ['uninstall']):
+            result = self.run_install(*command)
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn('nothing is installed there', result.stderr)
+            self.assertFalse(self.folder.exists(), 'only install creates the plugins folder')
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')

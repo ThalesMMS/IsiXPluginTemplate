@@ -90,7 +90,9 @@ def lock_folder(folder):
     """Holds an exclusive lock on the plugins folder until this script ends, so
     two runs never plan and apply recovery, or swap bundles, at the same time."""
     if not folder.is_dir():
-        return
+        # Only install creates the folder (before it locks it): with no folder,
+        # there is nothing to restore or uninstall, and nothing is locked.
+        raise InstallError(f'{folder} does not exist: nothing is installed there.', 2)
     descriptor = os.open(folder, os.O_RDONLY)
     try:
         fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
