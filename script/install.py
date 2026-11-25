@@ -228,15 +228,20 @@ def install(source, folder, domain):
 
     staging = folder / f'{STAGING_PREFIX}{uuid.uuid4().hex}'
     staging.mkdir()
+    # The copy is made in its own folder and moved next to state.json only once
+    # it is complete and checked, so recovery never mistakes an unfinished copy
+    # for the version a swap displaced.
+    copying = staging / 'copy' / source.name
     candidate = staging / source.name
     expected = fingerprint(source)
     (staging / 'state.json').write_text(json.dumps({'name': source.name, 'identifier': identifier, 'fingerprint': expected}))
     published = False
     try:
-        subprocess.run(['/usr/bin/ditto', str(source), str(candidate)], check=True)
-        if fingerprint(candidate) != expected:
+        subprocess.run(['/usr/bin/ditto', str(source), str(copying)], check=True)
+        if fingerprint(copying) != expected:
             raise InstallError('the copy differs from the bundle; nothing was installed.')
-        check_bundle(candidate, 'the copy')
+        check_bundle(copying, 'the copy')
+        os.rename(copying, candidate)
         interrupt_for_test('after-copy')
         rename(candidate, destination, RENAME_SWAP if destination.exists() else RENAME_EXCL)
         published = True
@@ -258,6 +263,10 @@ def restore(name, folder, domain):
     destination = folder / bundle_name(name)
     previous = folder / PREVIOUS_FOLDER / destination.name
     check_folder_is_own(folder, domain)
+    # An install interrupted after publishing still holds the version it
+    # replaced: keep it as the previous version before looking for one.
+    for line in recover(folder):
+        print(line)
     if not previous.is_dir() or not destination.is_dir():
         raise InstallError(f'There is no previous version of {destination.name} in {folder}.', 2)
     old, new = read_info(previous) or {}, read_info(destination) or {}

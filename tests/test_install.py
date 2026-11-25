@@ -208,14 +208,58 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 9)
         self.assertEqual(self.version(), '2.0')
         self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
-        result = self.run_install('restore')
-        self.assertNotEqual(result.returncode, 0, 'the old version is still in the interrupted staging folder')
         result = self.run_install('install', str(self.made('2.0')))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('kept the version replaced by an interrupted install', result.stdout)
         self.assertEqual(self.leftovers(), [])
         self.assertEqual(self.run_install('restore').returncode, 0)
         self.assertEqual(self.version(), '2.0', 'the previous version is the 2.0 just replaced again')
+
+    def test_restore_recovers_the_version_an_interrupted_update_replaced(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('kept the version replaced by an interrupted install', result.stdout)
+        self.assertEqual(self.version(), '1.0', 'restore puts back the version the interrupted update replaced')
+        self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
+        self.assertEqual(self.leftovers(), [])
+
+    def test_restore_prefers_the_interrupted_update_over_an_older_previous_version(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('3.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.version(), '2.0', 'not 1.0, the version kept before the interrupted update')
+
+    def test_an_unfinished_copy_is_never_kept_as_the_previous_version(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('3.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-copy'})
+        self.assertEqual(result.returncode, 9)
+        # A copy cut short by a crash: it never leaves the staging folder's copy area.
+        staging = self.folder / self.leftovers()[0]
+        inner = staging / 'MyIsiXPlugin.isixplugin'
+        shutil.rmtree(inner)
+        (staging / 'copy' / inner.name / 'Contents').mkdir(parents=True)
+        (staging / 'copy' / inner.name / 'Contents' / 'Info.plist').write_text('partial')
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('interrupted before it was published', result.stdout)
+        self.assertEqual(self.version(), '1.0')
+        self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
+        self.assertEqual(self.leftovers(), [])
+
+    def test_the_check_refuses_an_executable_it_cannot_read(self):
+        bundle = self.made('garbled')
+        (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')
+        done = subprocess.run([sys.executable, str(PROJECT / 'script' / 'verify_bundle.py'), str(bundle)],
+                              capture_output=True, text=True)
+        self.assertNotEqual(done.returncode, 0, done.stdout)
+        self.assertIn('architectures of the executable could not be read', done.stdout + done.stderr)
 
     def test_refuses_to_replace_or_remove_a_loaded_copy(self):
         self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
