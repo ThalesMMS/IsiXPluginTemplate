@@ -309,6 +309,13 @@ def install(source, folder, domain):
             other = installed.get('CFBundleIdentifier') if installed else 'no readable identifier'
             raise InstallError(f'{destination.name} in {folder} belongs to another plugin ({other}), not {identifier}. '
                                'It is left as it is; give your plugin another name or uninstall that one first.', 4)
+        # The same bundle again changes nothing, and is not swapped in: the
+        # copy it would displace is identical, so an interruption after the
+        # swap could not be told from one before it, and keeping that copy
+        # would only push out the version restore goes back to.
+        if fingerprint(destination) == fingerprint(source):
+            print(f'{identifier} {facts.get("version")} is already installed as {destination}; nothing was changed.')
+            return
         refuse_if_loaded(destination)
 
     staging = folder / f'{STAGING_PREFIX}{uuid.uuid4().hex}'

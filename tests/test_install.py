@@ -214,7 +214,22 @@ class InstallTests(unittest.TestCase):
         self.assertIn('kept the version replaced by an interrupted install', result.stdout)
         self.assertEqual(self.leftovers(), [])
         self.assertEqual(self.run_install('restore').returncode, 0)
-        self.assertEqual(self.version(), '2.0', 'the previous version is the 2.0 just replaced again')
+        self.assertEqual(self.version(), '1.0', 'the same 2.0 again does not replace the previous version')
+
+    def test_installing_the_same_bundle_again_changes_nothing(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        installed = tree_digest(self.folder / 'MyIsiXPlugin.isixplugin')
+        for point in ('after-copy', 'after-swap', None):
+            environment = {'ISIX_INSTALL_TEST_INTERRUPT': point} if point else None
+            result = self.run_install('install', str(self.made('2.0')), environment=environment)
+            self.assertEqual(result.returncode, 0, f'{point}: {result.stdout}{result.stderr}')
+            self.assertIn('already installed', result.stdout)
+            self.assertEqual(tree_digest(self.folder / 'MyIsiXPlugin.isixplugin'), installed)
+            self.assertEqual(self.version(folder=self.folder / '.horos-plugin-previous'), '1.0')
+            self.assertEqual(self.leftovers(), [])
+        self.assertEqual(self.run_install('restore').returncode, 0)
+        self.assertEqual(self.version(), '1.0', 'restore goes back to the version before 2.0')
 
     def test_restore_recovers_the_version_an_interrupted_update_replaced(self):
         self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
