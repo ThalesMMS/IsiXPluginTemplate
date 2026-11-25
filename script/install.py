@@ -196,27 +196,30 @@ def recover(folder):
         inner = staging / name if name else None
         published = bool(name and expected) and (folder / name).is_dir() and fingerprint(folder / name) == expected
         if published and inner.exists() and fingerprint(inner) != expected:
-            # The installed bundle is the new version, so what is left here is
-            # the one the swap displaced, unless it is a copy an older installer
-            # (which copied straight into the staging folder) left unfinished
-            # while reinstalling that same version. Only a whole bundle of the
-            # installed plugin is kept; anything else is dropped, never kept or
-            # published, and the saved previous version stays as it is.
-            identifier = (read_info(folder / name) or {}).get('CFBundleIdentifier')
-            if not identifier or not is_complete_bundle(folder / name, identifier):
-                # The installed bundle passed this check when it was installed:
-                # if it fails now, the check itself cannot run (no xcrun, a
-                # broken lipo...), and the copy cannot be judged either. Keep
-                # everything and stop rather than drop a version to restore.
-                raise InstallError(f'Cannot check the bundle an interrupted install left in {staging}: the '
-                                   f'installed {name} does not pass the check either (are the Xcode command '
-                                   'line tools installed?). Nothing was changed; run this again once '
-                                   'script/verify_bundle.py works.', 6)
-            if is_complete_bundle(inner, identifier):
+            if 'replaced' in state:
+                # This installer recorded the bundle the swap would displace:
+                # only that exact bundle is kept, with no tool involved.
+                displaced = state['replaced'] is not None and fingerprint(inner) == state['replaced']
+            else:
+                # An older installer, which copied straight into the staging
+                # folder: what is here may be the displaced version or a copy
+                # it left unfinished (also of the version installed now).
+                # Only a bundle the check proves whole is kept.
+                identifier = (read_info(folder / name) or {}).get('CFBundleIdentifier')
+                displaced = bool(identifier) and is_complete_bundle(inner, identifier)
+                if not displaced:
+                    # Unproven, perhaps only because the check could not run:
+                    # never delete it (it may be the only copy of the version
+                    # to go back to) and never publish it.
+                    done.append(f'left {staging} as it is: the bundle in it, from an older installer, could not '
+                                'be verified as the version an interrupted install replaced. Move it out of the '
+                                'Plugins folder yourself if you need it, or delete it.')
+                    continue
+            if displaced:
                 previous = keep_as_previous(inner, folder / name)
                 done.append(f'kept the version replaced by an interrupted install as {previous}')
             else:
-                done.append(f'removed an incomplete copy left by an interrupted install ({name})')
+                done.append(f'removed a copy left by an interrupted install that is not the version it replaced ({name})')
         else:
             done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
         shutil.rmtree(staging, ignore_errors=True)
@@ -264,7 +267,11 @@ def install(source, folder, domain):
     copying = staging / 'copy' / source.name
     candidate = staging / source.name
     expected = fingerprint(source)
-    (staging / 'state.json').write_text(json.dumps({'name': source.name, 'identifier': identifier, 'fingerprint': expected}))
+    # 'replaced' identifies the bundle the swap displaces, so recovery can tell
+    # it from anything else left in the staging folder without any tool.
+    replaced = fingerprint(destination) if destination.is_dir() else None
+    (staging / 'state.json').write_text(json.dumps({'name': source.name, 'identifier': identifier,
+                                                    'fingerprint': expected, 'replaced': replaced}))
     published = False
     try:
         subprocess.run(['/usr/bin/ditto', str(source), str(copying)], check=True)

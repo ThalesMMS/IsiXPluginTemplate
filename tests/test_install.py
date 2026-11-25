@@ -287,24 +287,42 @@ class InstallTests(unittest.TestCase):
                                                         'fingerprint': install.fingerprint(installed)}))
         result = self.run_install('restore')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('removed an incomplete copy', result.stdout)
+        self.assertIn('as it is', result.stdout)
         self.assertEqual(self.version(), '1.0', 'the real previous version, not the partial copy')
         self.assertEqual(self.verify_signature(installed), 0)
-        self.assertEqual(self.leftovers(), [])
+        self.assertEqual(self.leftovers(), [staging.name], 'an unproven copy is never deleted')
 
-    def test_recovery_keeps_everything_when_the_check_cannot_run(self):
+    def test_restore_after_an_interrupted_update_needs_no_tools(self):
         self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
         result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
         self.assertEqual(result.returncode, 9)
-        # Without xcrun and codesign the check cannot run: the 1.0 the update
-        # displaced must stay in the staging folder, not be dropped.
+        # The displaced 1.0 is known by the fingerprint the installer recorded:
+        # recovery keeps it even when xcrun and codesign cannot run.
         result = self.run_install('restore', environment={'PATH': str(self.scratch / 'no tools')})
-        self.assertEqual(result.returncode, 6, result.stdout + result.stderr)
-        self.assertIn('Nothing was changed', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('kept the version replaced by an interrupted install', result.stdout)
+        self.assertEqual(self.version(), '1.0')
+        self.assertEqual(self.leftovers(), [])
+
+    def test_an_older_installers_copy_the_check_cannot_judge_is_left_until_it_can(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        # As an older installer left it: no record of the displaced bundle.
+        staging = self.folder / self.leftovers()[0]
+        state = json.loads((staging / 'state.json').read_text())
+        del state['replaced']
+        (staging / 'state.json').write_text(json.dumps(state))
+        # The check fails for the staged bundle (no tools): it is left as it is.
+        result = self.run_install('restore', environment={'PATH': str(self.scratch / 'no tools')})
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('as it is', result.stdout)
         self.assertEqual(self.version(), '2.0')
-        self.assertEqual(len(self.leftovers()), 1)
+        self.assertEqual(self.leftovers(), [staging.name])
+        # Once the check works, the displaced 1.0 is recovered and restored.
         result = self.run_install('restore')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('kept the version replaced by an interrupted install', result.stdout)
         self.assertEqual(self.version(), '1.0')
         self.assertEqual(self.leftovers(), [])
 
