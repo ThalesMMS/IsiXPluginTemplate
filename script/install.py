@@ -203,7 +203,16 @@ def recover(folder):
             # installed plugin is kept; anything else is dropped, never kept or
             # published, and the saved previous version stays as it is.
             identifier = (read_info(folder / name) or {}).get('CFBundleIdentifier')
-            if identifier and is_complete_bundle(inner, identifier):
+            if not identifier or not is_complete_bundle(folder / name, identifier):
+                # The installed bundle passed this check when it was installed:
+                # if it fails now, the check itself cannot run (no xcrun, a
+                # broken lipo...), and the copy cannot be judged either. Keep
+                # everything and stop rather than drop a version to restore.
+                raise InstallError(f'Cannot check the bundle an interrupted install left in {staging}: the '
+                                   f'installed {name} does not pass the check either (are the Xcode command '
+                                   'line tools installed?). Nothing was changed; run this again once '
+                                   'script/verify_bundle.py works.', 6)
+            if is_complete_bundle(inner, identifier):
                 previous = keep_as_previous(inner, folder / name)
                 done.append(f'kept the version replaced by an interrupted install as {previous}')
             else:

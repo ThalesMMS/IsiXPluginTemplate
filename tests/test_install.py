@@ -292,6 +292,22 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.verify_signature(installed), 0)
         self.assertEqual(self.leftovers(), [])
 
+    def test_recovery_keeps_everything_when_the_check_cannot_run(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        # Without xcrun and codesign the check cannot run: the 1.0 the update
+        # displaced must stay in the staging folder, not be dropped.
+        result = self.run_install('restore', environment={'PATH': str(self.scratch / 'no tools')})
+        self.assertEqual(result.returncode, 6, result.stdout + result.stderr)
+        self.assertIn('Nothing was changed', result.stderr)
+        self.assertEqual(self.version(), '2.0')
+        self.assertEqual(len(self.leftovers()), 1)
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.version(), '1.0')
+        self.assertEqual(self.leftovers(), [])
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')
