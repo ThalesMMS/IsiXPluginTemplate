@@ -12,6 +12,7 @@ Exits with 2, skipped, when there is no built bundle.
 """
 from pathlib import Path
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -402,6 +403,28 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.version(), '3.0')
         for path, digest in before.items():
             self.assertEqual(tree_digest(path), digest, f'{path} changed')
+
+    def test_a_run_while_another_holds_the_folder_changes_nothing(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        staging = self.folder / self.leftovers()[0]
+        before = tree_digest(self.folder)
+        # Another run holds the plugins folder: nothing is planned or applied.
+        descriptor = os.open(self.folder, os.O_RDONLY)
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            for command in (['restore'], ['uninstall'], ['install', str(self.made('3.0'))]):
+                result = self.run_install(*command)
+                self.assertEqual(result.returncode, 8, result.stdout + result.stderr)
+                self.assertIn('Another run of this script', result.stderr)
+                self.assertEqual(tree_digest(self.folder), before)
+        finally:
+            os.close(descriptor)
+        self.assertEqual(self.leftovers(), [staging.name])
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.version(), '1.0')
 
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')

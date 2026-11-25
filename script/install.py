@@ -35,6 +35,7 @@ refuses to replace or remove a copy that a running process has loaded.
 from pathlib import Path
 import argparse
 import ctypes
+import fcntl
 import hashlib
 import json
 import os
@@ -80,6 +81,23 @@ def check_folder_is_own(folder, domain):
         path = path / part
         if path.is_symlink():
             raise InstallError(f'{path} is a symbolic link; the script writes only into a real IsiX plugins folder.')
+
+
+_locks = []
+
+
+def lock_folder(folder):
+    """Holds an exclusive lock on the plugins folder until this script ends, so
+    two runs never plan and apply recovery, or swap bundles, at the same time."""
+    if not folder.is_dir():
+        return
+    descriptor = os.open(folder, os.O_RDONLY)
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(descriptor)
+        raise InstallError(f'Another run of this script is changing {folder}; wait for it to end and run this again.', 8)
+    _locks.append(descriptor)
 
 
 def domain_of(home, system):
@@ -257,6 +275,7 @@ def install(source, folder, domain):
                         f'{", ".join(facts.get("architectures", []))}')
     folder.mkdir(parents=True, exist_ok=True)
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
     for line in recover(folder):
         print(line)
     destination = folder / source.name
@@ -317,6 +336,7 @@ def restore(name, folder, domain):
     destination = folder / bundle_name(name)
     previous = folder / PREVIOUS_FOLDER / destination.name
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
     # An install interrupted after publishing still holds the version it
     # replaced: keep it as the previous version before looking for one.
     for line in recover(folder):
@@ -338,6 +358,7 @@ def uninstall(name, identifier, folder, domain):
     target = folder / bundle_name(name)
     identifier = identifier or build_setting('PRODUCT_BUNDLE_IDENTIFIER')
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
     for line in recover(folder):
         print(line)
     if not target.exists():
