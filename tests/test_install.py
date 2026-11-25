@@ -253,6 +253,24 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
         self.assertEqual(self.leftovers(), [])
 
+    def test_a_partial_copy_left_by_an_older_installer_is_never_kept_or_published(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        # Older installers copied straight into the staging folder: a crash during
+        # the copy left a partial bundle (readable Info.plist, no executable) there.
+        staging = self.folder / '.isix-plugin-install-0123456789abcdef'
+        partial = staging / 'MyIsiXPlugin.isixplugin'
+        shutil.copytree(self.made('3.0'), partial, symlinks=True)
+        shutil.rmtree(partial / 'Contents' / 'MacOS')
+        (staging / 'state.json').write_text(json.dumps({'name': partial.name, 'identifier': IDENTIFIER,
+                                                        'fingerprint': 'digest of the complete 3.0 copy'}))
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('interrupted before it was published', result.stdout)
+        self.assertEqual(self.version(), '1.0', 'the real previous version, not the partial copy')
+        self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
+        self.assertEqual(self.leftovers(), [])
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')

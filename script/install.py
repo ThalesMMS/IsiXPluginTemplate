@@ -182,9 +182,14 @@ def recover(folder):
         except (OSError, ValueError):
             state = {}
         name = state.get('name')
+        expected = state.get('fingerprint')
         inner = staging / name if name else None
-        if inner and inner.exists() and (folder / name).exists() and fingerprint(inner) != state.get('fingerprint'):
-            # The new version was published and the old one is what is left here.
+        published = bool(name and expected) and (folder / name).is_dir() and fingerprint(folder / name) == expected
+        if published and inner.exists() and fingerprint(inner) != expected:
+            # The installed bundle is the new version, so what is left here is
+            # the one the swap displaced. Anything else (a copy cut short,
+            # also by an older installer that copied straight into the
+            # staging folder) is dropped and never kept or published.
             previous = keep_as_previous(inner, folder / name)
             done.append(f'kept the version replaced by an interrupted install as {previous}')
         else:
