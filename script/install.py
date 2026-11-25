@@ -255,20 +255,25 @@ def recover(folder):
                            'be resolved by running this again once script/verify_bundle.py works.', 7)
     done = []
     for staging, name, kind, installed in plan:
-        # The decision holds only for the installed bundle it was made on:
-        # if that changed meanwhile (a script without the folder lock), stop.
+        # First take the folder out of reach: an installer still working in it
+        # (one without the folder lock) can no longer swap its candidate in.
+        # Then check that the installed bundle is still the one the decision
+        # was made on; a swap before the rename shows up here.
+        held = staging.with_name(staging.name + '-recovering')
+        os.rename(staging, held)
         if name:
             now = fingerprint(folder / name) if (folder / name).is_dir() else None
             if now != installed:
+                os.rename(held, staging)
                 raise InstallError('\n'.join(done + [f'{folder / name} changed while interrupted installs were being '
                                                       f'recovered; {staging} and the rest were left as they are. '
                                                       'Run this again.']), 8)
         if kind == 'displaced':
-            previous = keep_as_previous(staging / name, folder / name)
+            previous = keep_as_previous(held / name, folder / name)
             done.append(f'kept the version replaced by an interrupted install as {previous}')
         else:
             done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
-        shutil.rmtree(staging, ignore_errors=True)
+        shutil.rmtree(held, ignore_errors=True)
     return done
 
 

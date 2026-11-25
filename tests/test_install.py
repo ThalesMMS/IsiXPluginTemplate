@@ -462,6 +462,34 @@ class InstallTests(unittest.TestCase):
             self.assertIn('nothing is installed there', result.stderr)
             self.assertFalse(self.folder.exists(), 'only install creates the plugins folder')
 
+    def test_an_unlocked_swap_after_the_check_cannot_use_the_folder_being_removed(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-copy'})
+        self.assertEqual(result.returncode, 9)
+        staging = self.folder / self.leftovers()[0]
+        installed = self.folder / 'MyIsiXPlugin.isixplugin'
+        sys.path.insert(0, str(PROJECT / 'script'))
+        import install
+        real, attempts = install.shutil.rmtree, []
+        def rmtree(path, *arguments, **options):
+            # Just before removal, a script without the folder lock tries to
+            # publish the candidate it staged there.
+            try:
+                install.rename(staging / installed.name, installed, install.RENAME_SWAP)
+                attempts.append('swapped')
+            except OSError:
+                attempts.append('refused')
+            return real(path, *arguments, **options)
+        install.shutil.rmtree = rmtree
+        try:
+            install.recover(self.folder)
+        finally:
+            install.shutil.rmtree = real
+        self.assertEqual(attempts, ['refused'])
+        self.assertEqual(self.version(), '1.0')
+        self.assertEqual(self.verify_signature(installed), 0)
+        self.assertEqual(self.leftovers(), [])
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')
