@@ -385,6 +385,24 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.version(), '2.0')
         self.assertEqual(self.leftovers(), [])
 
+    def test_a_copy_that_is_not_the_recorded_one_is_left_for_the_user(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('3.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        # As if another install had run meanwhile: the copy here is not the bundle recorded as replaced.
+        staging = self.folder / self.leftovers()[0]
+        state = json.loads((staging / 'state.json').read_text())
+        state['replaced'] = 'fingerprint of a bundle another install displaced'
+        (staging / 'state.json').write_text(json.dumps(state))
+        before = {path: tree_digest(path) for path in (staging, self.folder / '.horos-plugin-previous')}
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn('another install may have run at the same time', result.stderr)
+        self.assertEqual(self.version(), '3.0')
+        for path, digest in before.items():
+            self.assertEqual(tree_digest(path), digest, f'{path} changed')
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')

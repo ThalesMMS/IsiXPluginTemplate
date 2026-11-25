@@ -203,6 +203,13 @@ def recover(folder):
                 # This installer recorded the bundle the swap would displace:
                 # only that exact bundle is kept, with no tool involved.
                 displaced = state['replaced'] is not None and fingerprint(inner) == state['replaced']
+                if not displaced:
+                    # Not what was recorded: another install changed the
+                    # bundle meanwhile, so this may be the only copy of the
+                    # version it displaced. Leave it for the user to judge.
+                    unresolved.append((staging, 'the bundle in it is not the one that install recorded as replacing '
+                                                '(another install may have run at the same time)'))
+                    continue
             else:
                 # An older installer, which copied straight into the staging
                 # folder: what is here may be the displaced version or a copy
@@ -214,24 +221,22 @@ def recover(folder):
                     # Unproven, perhaps only because the check could not run:
                     # never delete it (it may be the only copy of the version
                     # to go back to) and never publish it.
-                    unresolved.append(staging)
+                    unresolved.append((staging, 'the bundle in it, from an older installer, could not be verified '
+                                                'as the version an interrupted install replaced'))
                     continue
-            plan.append((staging, name, 'displaced' if displaced else 'other copy'))
+            plan.append((staging, name, 'displaced'))
         else:
             plan.append((staging, name or staging.name, 'unpublished'))
     if unresolved:
-        raise InstallError('\n'.join(
-            f'{path} was left as it is: the bundle in it, from an older installer, could not be verified as the '
-            'version an interrupted install replaced.' for path in unresolved) + '\nNothing was changed. '
-            'Run this again once script/verify_bundle.py works, or move that folder out of the Plugins folder '
-            '(keep it if you may need that version) and run this again.', 7)
+        raise InstallError('\n'.join(f'{path} was left as it is: {reason}.' for path, reason in unresolved)
+                           + '\nNothing was changed. Move that folder out of the Plugins folder (keep it if you '
+                           'may need that version) and run this again; a folder from an older installer may also '
+                           'be resolved by running this again once script/verify_bundle.py works.', 7)
     done = []
     for staging, name, kind in plan:
         if kind == 'displaced':
             previous = keep_as_previous(staging / name, folder / name)
             done.append(f'kept the version replaced by an interrupted install as {previous}')
-        elif kind == 'other copy':
-            done.append(f'removed a copy left by an interrupted install that is not the version it replaced ({name})')
         else:
             done.append(f'removed an install that was interrupted before it was published ({name})')
         shutil.rmtree(staging, ignore_errors=True)
