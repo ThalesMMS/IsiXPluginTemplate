@@ -182,8 +182,11 @@ def keep_as_previous(old, destination):
 
 
 def recover(folder):
-    """Finishes or undoes installs that were interrupted; returns what it did."""
-    done = []
+    """Finishes or undoes installs that were interrupted; returns what it did.
+    Raises, after doing what it can, while a staging folder it cannot resolve
+    is left: changing the installed bundle then would make that folder look
+    unpublished to a later recovery, which would delete it."""
+    done, unresolved = [], []
     if not folder.is_dir():
         return done
     for staging in sorted(folder.glob(STAGING_PREFIX + '*')):
@@ -211,9 +214,7 @@ def recover(folder):
                     # Unproven, perhaps only because the check could not run:
                     # never delete it (it may be the only copy of the version
                     # to go back to) and never publish it.
-                    done.append(f'left {staging} as it is: the bundle in it, from an older installer, could not '
-                                'be verified as the version an interrupted install replaced. Move it out of the '
-                                'Plugins folder yourself if you need it, or delete it.')
+                    unresolved.append(staging)
                     continue
             if displaced:
                 previous = keep_as_previous(inner, folder / name)
@@ -223,6 +224,12 @@ def recover(folder):
         else:
             done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
         shutil.rmtree(staging, ignore_errors=True)
+    if unresolved:
+        raise InstallError('\n'.join(done + [
+            f'{path} was left as it is: the bundle in it, from an older installer, could not be verified as the '
+            'version an interrupted install replaced.' for path in unresolved]) + '\nNothing else was changed. '
+            'Run this again once script/verify_bundle.py works, or move that folder out of the Plugins folder '
+            '(keep it if you may need that version) and run this again.', 7)
     return done
 
 
@@ -321,6 +328,8 @@ def uninstall(name, identifier, folder, domain):
     target = folder / bundle_name(name)
     identifier = identifier or build_setting('PRODUCT_BUNDLE_IDENTIFIER')
     check_folder_is_own(folder, domain)
+    for line in recover(folder):
+        print(line)
     if not target.exists():
         raise InstallError(f'{target.name} is not installed in {folder}.', 2)
     if target.is_symlink() or not target.is_dir():

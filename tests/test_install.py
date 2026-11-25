@@ -286,11 +286,17 @@ class InstallTests(unittest.TestCase):
         (staging / 'state.json').write_text(json.dumps({'name': installed.name, 'identifier': IDENTIFIER,
                                                         'fingerprint': install.fingerprint(installed)}))
         result = self.run_install('restore')
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn('as it is', result.stderr)
+        self.assertEqual(self.version(), '2.0', 'nothing changes while the copy is unresolved')
+        self.assertEqual(self.version(folder=self.folder / '.horos-plugin-previous'), '1.0')
+        self.assertEqual(self.leftovers(), [staging.name], 'an unproven copy is never deleted')
+        # Once the user moves it away, restore goes ahead with the real previous version.
+        shutil.move(str(staging), str(self.scratch / 'moved away'))
+        result = self.run_install('restore')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('as it is', result.stdout)
         self.assertEqual(self.version(), '1.0', 'the real previous version, not the partial copy')
         self.assertEqual(self.verify_signature(installed), 0)
-        self.assertEqual(self.leftovers(), [staging.name], 'an unproven copy is never deleted')
 
     def test_restore_after_an_interrupted_update_needs_no_tools(self):
         self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
@@ -315,8 +321,8 @@ class InstallTests(unittest.TestCase):
         (staging / 'state.json').write_text(json.dumps(state))
         # The check fails for the staged bundle (no tools): it is left as it is.
         result = self.run_install('restore', environment={'PATH': str(self.scratch / 'no tools')})
-        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('as it is', result.stdout)
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn('as it is', result.stderr)
         self.assertEqual(self.version(), '2.0')
         self.assertEqual(self.leftovers(), [staging.name])
         # Once the check works, the displaced 1.0 is recovered and restored.
@@ -324,6 +330,30 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('kept the version replaced by an interrupted install', result.stdout)
         self.assertEqual(self.version(), '1.0')
+        self.assertEqual(self.leftovers(), [])
+
+    def test_an_unresolved_copy_blocks_changes_that_would_lose_it(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('3.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        # An older installer's staging folder holding the displaced 2.0, with 1.0
+        # saved as the previous version, and a check that cannot run.
+        staging = self.folder / self.leftovers()[0]
+        state = json.loads((staging / 'state.json').read_text())
+        del state['replaced']
+        (staging / 'state.json').write_text(json.dumps(state))
+        no_tools = {'PATH': str(self.scratch / 'no tools')}
+        for command in (['restore'], ['restore'], ['uninstall']):
+            result = self.run_install(*command, environment=no_tools)
+            self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+            self.assertEqual(self.version(), '3.0')
+            self.assertEqual(self.version(folder=self.folder / '.horos-plugin-previous'), '1.0')
+            self.assertEqual(self.leftovers(), [staging.name])
+        # With the check working again, the displaced 2.0 is the one restored.
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.version(), '2.0')
         self.assertEqual(self.leftovers(), [])
 
     def test_the_check_refuses_an_executable_it_cannot_read(self):
