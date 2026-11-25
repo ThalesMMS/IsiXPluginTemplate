@@ -356,6 +356,35 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.version(), '2.0')
         self.assertEqual(self.leftovers(), [])
 
+    def test_an_unresolved_copy_stops_recovery_before_any_other_folder_is_handled(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('3.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-swap'})
+        self.assertEqual(result.returncode, 9)
+        resolvable = self.folder / self.leftovers()[0]  # this installer's: holds 2.0, records it
+        # Next to it, an older installer's folder with a partial copy the check cannot judge.
+        older = self.folder / '.isix-plugin-install-0000000000000000'
+        partial = older / 'MyIsiXPlugin.isixplugin'
+        shutil.copytree(self.made('2.5'), partial, symlinks=True)
+        shutil.rmtree(partial / 'Contents' / 'MacOS')
+        sys.path.insert(0, str(PROJECT / 'script'))
+        import install
+        (older / 'state.json').write_text(json.dumps({'name': partial.name, 'identifier': IDENTIFIER,
+                                                      'fingerprint': install.fingerprint(self.folder / partial.name)}))
+        before = {path: tree_digest(path) for path in (resolvable, older, self.folder / '.horos-plugin-previous')}
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn('Nothing was changed', result.stderr)
+        self.assertEqual(self.version(), '3.0')
+        for path, digest in before.items():
+            self.assertEqual(tree_digest(path), digest, f'{path} changed')
+        # With the older folder moved away, the resolvable one is handled: 2.0 comes back.
+        shutil.move(str(older), str(self.scratch / 'moved away'))
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.version(), '2.0')
+        self.assertEqual(self.leftovers(), [])
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')

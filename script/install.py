@@ -183,12 +183,12 @@ def keep_as_previous(old, destination):
 
 def recover(folder):
     """Finishes or undoes installs that were interrupted; returns what it did.
-    Raises, after doing what it can, while a staging folder it cannot resolve
-    is left: changing the installed bundle then would make that folder look
-    unpublished to a later recovery, which would delete it."""
-    done, unresolved = [], []
+    Decides for every staging folder first and changes nothing while one of
+    them cannot be resolved: changing the installed bundle then would make
+    that folder look unpublished to a later recovery, which would delete it."""
     if not folder.is_dir():
-        return done
+        return []
+    plan, unresolved = [], []
     for staging in sorted(folder.glob(STAGING_PREFIX + '*')):
         try:
             state = json.loads((staging / 'state.json').read_text())
@@ -216,20 +216,25 @@ def recover(folder):
                     # to go back to) and never publish it.
                     unresolved.append(staging)
                     continue
-            if displaced:
-                previous = keep_as_previous(inner, folder / name)
-                done.append(f'kept the version replaced by an interrupted install as {previous}')
-            else:
-                done.append(f'removed a copy left by an interrupted install that is not the version it replaced ({name})')
+            plan.append((staging, name, 'displaced' if displaced else 'other copy'))
         else:
-            done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
-        shutil.rmtree(staging, ignore_errors=True)
+            plan.append((staging, name or staging.name, 'unpublished'))
     if unresolved:
-        raise InstallError('\n'.join(done + [
+        raise InstallError('\n'.join(
             f'{path} was left as it is: the bundle in it, from an older installer, could not be verified as the '
-            'version an interrupted install replaced.' for path in unresolved]) + '\nNothing else was changed. '
+            'version an interrupted install replaced.' for path in unresolved) + '\nNothing was changed. '
             'Run this again once script/verify_bundle.py works, or move that folder out of the Plugins folder '
             '(keep it if you may need that version) and run this again.', 7)
+    done = []
+    for staging, name, kind in plan:
+        if kind == 'displaced':
+            previous = keep_as_previous(staging / name, folder / name)
+            done.append(f'kept the version replaced by an interrupted install as {previous}')
+        elif kind == 'other copy':
+            done.append(f'removed a copy left by an interrupted install that is not the version it replaced ({name})')
+        else:
+            done.append(f'removed an install that was interrupted before it was published ({name})')
+        shutil.rmtree(staging, ignore_errors=True)
     return done
 
 
