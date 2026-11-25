@@ -215,7 +215,8 @@ def recover(folder):
         name = state.get('name')
         expected = state.get('fingerprint')
         inner = staging / name if name else None
-        published = bool(name and expected) and (folder / name).is_dir() and fingerprint(folder / name) == expected
+        installed = fingerprint(folder / name) if name and (folder / name).is_dir() else None
+        published = bool(expected) and installed == expected
         if published and inner.exists() and fingerprint(inner) != expected:
             if 'replaced' in state:
                 # This installer recorded the bundle the swap would displace:
@@ -242,21 +243,29 @@ def recover(folder):
                     unresolved.append((staging, 'the bundle in it, from an older installer, could not be verified '
                                                 'as the version an interrupted install replaced'))
                     continue
-            plan.append((staging, name, 'displaced'))
+            plan.append((staging, name, 'displaced', installed))
         else:
-            plan.append((staging, name or staging.name, 'unpublished'))
+            plan.append((staging, name, 'unpublished', installed))
     if unresolved:
         raise InstallError('\n'.join(f'{path} was left as it is: {reason}.' for path, reason in unresolved)
                            + '\nNothing was changed. Move that folder out of the Plugins folder (keep it if you '
                            'may need that version) and run this again; a folder from an older installer may also '
                            'be resolved by running this again once script/verify_bundle.py works.', 7)
     done = []
-    for staging, name, kind in plan:
+    for staging, name, kind, installed in plan:
+        # The decision holds only for the installed bundle it was made on:
+        # if that changed meanwhile (a script without the folder lock), stop.
+        if name:
+            now = fingerprint(folder / name) if (folder / name).is_dir() else None
+            if now != installed:
+                raise InstallError('\n'.join(done + [f'{folder / name} changed while interrupted installs were being '
+                                                      f'recovered; {staging} and the rest were left as they are. '
+                                                      'Run this again.']), 8)
         if kind == 'displaced':
             previous = keep_as_previous(staging / name, folder / name)
             done.append(f'kept the version replaced by an interrupted install as {previous}')
         else:
-            done.append(f'removed an install that was interrupted before it was published ({name})')
+            done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
         shutil.rmtree(staging, ignore_errors=True)
     return done
 

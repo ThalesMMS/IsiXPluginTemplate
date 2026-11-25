@@ -426,6 +426,32 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.version(), '1.0')
 
+    def test_recovery_stops_if_the_installed_bundle_changes_after_it_decided(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        result = self.run_install('install', str(self.made('2.0')), environment={'ISIX_INSTALL_TEST_INTERRUPT': 'after-copy'})
+        self.assertEqual(result.returncode, 9)
+        staging = self.folder / self.leftovers()[0]
+        sys.path.insert(0, str(PROJECT / 'script'))
+        import install
+        installed = self.folder / 'MyIsiXPlugin.isixplugin'
+        real, seen = install.fingerprint, []
+        def fingerprint(bundle):
+            # As if a script without the folder lock swapped a bundle in
+            # between the decision and the action.
+            if Path(bundle) == installed:
+                seen.append(bundle)
+                if len(seen) > 1:
+                    return 'the bundle another script published'
+            return real(bundle)
+        install.fingerprint = fingerprint
+        try:
+            with self.assertRaises(install.InstallError) as raised:
+                install.recover(self.folder)
+        finally:
+            install.fingerprint = real
+        self.assertEqual(raised.exception.code, 8)
+        self.assertEqual(self.leftovers(), [staging.name], 'the folder decided on is left as it is')
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')
