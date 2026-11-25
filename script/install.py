@@ -35,6 +35,7 @@ refuses to replace or remove a copy that a running process has loaded.
 from pathlib import Path
 import argparse
 import ctypes
+import fcntl
 import hashlib
 import json
 import os
@@ -80,6 +81,25 @@ def check_folder_is_own(folder, domain):
         path = path / part
         if path.is_symlink():
             raise InstallError(f'{path} is a symbolic link; the script writes only into a real IsiX plugins folder.')
+
+
+_locks = []
+
+
+def lock_folder(folder):
+    """Holds an exclusive lock on the plugins folder until this script ends, so
+    two runs never plan and apply recovery, or swap bundles, at the same time."""
+    if not folder.is_dir():
+        # Only install creates the folder (before it locks it): with no folder,
+        # there is nothing to restore or uninstall, and nothing is locked.
+        raise InstallError(f'{folder} does not exist: nothing is installed there.', 2)
+    descriptor = os.open(folder, os.O_RDONLY)
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(descriptor)
+        raise InstallError(f'Another run of this script is changing {folder}; wait for it to end and run this again.', 8)
+    _locks.append(descriptor)
 
 
 def domain_of(home, system):
@@ -162,6 +182,16 @@ def interrupt_for_test(point):
         os._exit(9)
 
 
+def is_complete_bundle(bundle, identifier):
+    """Whether the bundle is whole: the application would load it, its
+    signature verifies and it has the given identifier."""
+    try:
+        facts, problems, _ = verify_bundle.inspect(bundle)
+    except Exception:  # an unreadable leftover is not a whole bundle
+        return False
+    return not problems and bool(facts.get('signed')) and facts.get('identifier') == identifier
+
+
 def keep_as_previous(old, destination):
     previous = destination.parent / PREVIOUS_FOLDER / destination.name
     previous.parent.mkdir(exist_ok=True)
@@ -172,24 +202,78 @@ def keep_as_previous(old, destination):
 
 
 def recover(folder):
-    """Finishes or undoes installs that were interrupted; returns what it did."""
-    done = []
+    """Finishes or undoes installs that were interrupted; returns what it did.
+    Decides for every staging folder first and changes nothing while one of
+    them cannot be resolved: changing the installed bundle then would make
+    that folder look unpublished to a later recovery, which would delete it."""
     if not folder.is_dir():
-        return done
+        return []
+    plan, unresolved = [], []
     for staging in sorted(folder.glob(STAGING_PREFIX + '*')):
         try:
             state = json.loads((staging / 'state.json').read_text())
         except (OSError, ValueError):
             state = {}
         name = state.get('name')
+        expected = state.get('fingerprint')
         inner = staging / name if name else None
-        if inner and inner.exists() and (folder / name).exists() and fingerprint(inner) != state.get('fingerprint'):
-            # The new version was published and the old one is what is left here.
-            previous = keep_as_previous(inner, folder / name)
+        installed = fingerprint(folder / name) if name and (folder / name).is_dir() else None
+        published = bool(expected) and installed == expected
+        if published and inner.exists() and fingerprint(inner) != expected:
+            if 'replaced' in state:
+                # This installer recorded the bundle the swap would displace:
+                # only that exact bundle is kept, with no tool involved.
+                displaced = state['replaced'] is not None and fingerprint(inner) == state['replaced']
+                if not displaced:
+                    # Not what was recorded: another install changed the
+                    # bundle meanwhile, so this may be the only copy of the
+                    # version it displaced. Leave it for the user to judge.
+                    unresolved.append((staging, 'the bundle in it is not the one that install recorded as replacing '
+                                                '(another install may have run at the same time)'))
+                    continue
+            else:
+                # An older installer, which copied straight into the staging
+                # folder: what is here may be the displaced version or a copy
+                # it left unfinished (also of the version installed now).
+                # Only a bundle the check proves whole is kept.
+                identifier = (read_info(folder / name) or {}).get('CFBundleIdentifier')
+                displaced = bool(identifier) and is_complete_bundle(inner, identifier)
+                if not displaced:
+                    # Unproven, perhaps only because the check could not run:
+                    # never delete it (it may be the only copy of the version
+                    # to go back to) and never publish it.
+                    unresolved.append((staging, 'the bundle in it, from an older installer, could not be verified '
+                                                'as the version an interrupted install replaced'))
+                    continue
+            plan.append((staging, name, 'displaced', installed))
+        else:
+            plan.append((staging, name, 'unpublished', installed))
+    if unresolved:
+        raise InstallError('\n'.join(f'{path} was left as it is: {reason}.' for path, reason in unresolved)
+                           + '\nNothing was changed. Move that folder out of the Plugins folder (keep it if you '
+                           'may need that version) and run this again; a folder from an older installer may also '
+                           'be resolved by running this again once script/verify_bundle.py works.', 7)
+    done = []
+    for staging, name, kind, installed in plan:
+        # First take the folder out of reach: an installer still working in it
+        # (one without the folder lock) can no longer swap its candidate in.
+        # Then check that the installed bundle is still the one the decision
+        # was made on; a swap before the rename shows up here.
+        held = staging.with_name(staging.name + '-recovering')
+        os.rename(staging, held)
+        if name:
+            now = fingerprint(folder / name) if (folder / name).is_dir() else None
+            if now != installed:
+                os.rename(held, staging)
+                raise InstallError('\n'.join(done + [f'{folder / name} changed while interrupted installs were being '
+                                                      f'recovered; {staging} and the rest were left as they are. '
+                                                      'Run this again.']), 8)
+        if kind == 'displaced':
+            previous = keep_as_previous(held / name, folder / name)
             done.append(f'kept the version replaced by an interrupted install as {previous}')
         else:
             done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
-        shutil.rmtree(staging, ignore_errors=True)
+        shutil.rmtree(held, ignore_errors=True)
     return done
 
 
@@ -207,6 +291,7 @@ def install(source, folder, domain):
                         f'{", ".join(facts.get("architectures", []))}')
     folder.mkdir(parents=True, exist_ok=True)
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
     for line in recover(folder):
         print(line)
     destination = folder / source.name
@@ -224,19 +309,35 @@ def install(source, folder, domain):
             other = installed.get('CFBundleIdentifier') if installed else 'no readable identifier'
             raise InstallError(f'{destination.name} in {folder} belongs to another plugin ({other}), not {identifier}. '
                                'It is left as it is; give your plugin another name or uninstall that one first.', 4)
+        # The same bundle again changes nothing, and is not swapped in: the
+        # copy it would displace is identical, so an interruption after the
+        # swap could not be told from one before it, and keeping that copy
+        # would only push out the version restore goes back to.
+        if fingerprint(destination) == fingerprint(source):
+            print(f'{identifier} {facts.get("version")} is already installed as {destination}; nothing was changed.')
+            return
         refuse_if_loaded(destination)
 
     staging = folder / f'{STAGING_PREFIX}{uuid.uuid4().hex}'
     staging.mkdir()
+    # The copy is made in its own folder and moved next to state.json only once
+    # it is complete and checked, so recovery never mistakes an unfinished copy
+    # for the version a swap displaced.
+    copying = staging / 'copy' / source.name
     candidate = staging / source.name
     expected = fingerprint(source)
-    (staging / 'state.json').write_text(json.dumps({'name': source.name, 'identifier': identifier, 'fingerprint': expected}))
+    # 'replaced' identifies the bundle the swap displaces, so recovery can tell
+    # it from anything else left in the staging folder without any tool.
+    replaced = fingerprint(destination) if destination.is_dir() else None
+    (staging / 'state.json').write_text(json.dumps({'name': source.name, 'identifier': identifier,
+                                                    'fingerprint': expected, 'replaced': replaced}))
     published = False
     try:
-        subprocess.run(['/usr/bin/ditto', str(source), str(candidate)], check=True)
-        if fingerprint(candidate) != expected:
+        subprocess.run(['/usr/bin/ditto', str(source), str(copying)], check=True)
+        if fingerprint(copying) != expected:
             raise InstallError('the copy differs from the bundle; nothing was installed.')
-        check_bundle(candidate, 'the copy')
+        check_bundle(copying, 'the copy')
+        os.rename(copying, candidate)
         interrupt_for_test('after-copy')
         rename(candidate, destination, RENAME_SWAP if destination.exists() else RENAME_EXCL)
         published = True
@@ -258,6 +359,11 @@ def restore(name, folder, domain):
     destination = folder / bundle_name(name)
     previous = folder / PREVIOUS_FOLDER / destination.name
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
+    # An install interrupted after publishing still holds the version it
+    # replaced: keep it as the previous version before looking for one.
+    for line in recover(folder):
+        print(line)
     if not previous.is_dir() or not destination.is_dir():
         raise InstallError(f'There is no previous version of {destination.name} in {folder}.', 2)
     old, new = read_info(previous) or {}, read_info(destination) or {}
@@ -275,6 +381,9 @@ def uninstall(name, identifier, folder, domain):
     target = folder / bundle_name(name)
     identifier = identifier or build_setting('PRODUCT_BUNDLE_IDENTIFIER')
     check_folder_is_own(folder, domain)
+    lock_folder(folder)
+    for line in recover(folder):
+        print(line)
     if not target.exists():
         raise InstallError(f'{target.name} is not installed in {folder}.', 2)
     if target.is_symlink() or not target.is_dir():

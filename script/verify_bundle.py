@@ -46,6 +46,14 @@ def xcrun(*command):
     return result.stdout if result.returncode == 0 else ''
 
 
+def xcrun_checked(*command):
+    """(stdout, error): error is the tool's message when the command failed."""
+    result = run('xcrun', *command)
+    if result.returncode == 0:
+        return result.stdout, None
+    return '', (result.stderr or result.stdout or f'exit status {result.returncode}').strip()
+
+
 def version_tuple(text):
     return tuple(int(part) for part in str(text).split('.')[:2] if part.isdigit()) or (0,)
 
@@ -108,8 +116,13 @@ def inspect(bundle, archs=()):
     if not executable_name or not executable.is_file():
         problems.append(f'the executable Contents/MacOS/{executable_name} is missing')
         return facts, problems, warnings
-    present = xcrun('lipo', '-archs', str(executable)).split()
+    output, error = xcrun_checked('lipo', '-archs', str(executable))
+    present = output.split()
     facts['architectures'] = present
+    if error or not present:
+        problems.append('the architectures of the executable could not be read'
+                        + (f' (lipo: {error})' if error else ''))
+        return facts, problems, warnings
     for arch in archs:
         if arch not in present:
             problems.append(f'no {arch} slice (the executable has {", ".join(present) or "none"})')
