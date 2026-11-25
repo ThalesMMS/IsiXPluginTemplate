@@ -271,6 +271,27 @@ class InstallTests(unittest.TestCase):
         self.assertEqual(self.verify_signature(self.folder / 'MyIsiXPlugin.isixplugin'), 0)
         self.assertEqual(self.leftovers(), [])
 
+    def test_a_partial_copy_of_the_installed_version_is_never_kept_or_published(self):
+        self.assertEqual(self.run_install('install', str(self.made('1.0'))).returncode, 0)
+        self.assertEqual(self.run_install('install', str(self.made('2.0'))).returncode, 0)
+        # An older installer killed while reinstalling the same 2.0: the installed
+        # bundle already matches the fingerprint state.json records.
+        sys.path.insert(0, str(PROJECT / 'script'))
+        import install
+        installed = self.folder / 'MyIsiXPlugin.isixplugin'
+        staging = self.folder / '.isix-plugin-install-fedcba9876543210'
+        partial = staging / installed.name
+        shutil.copytree(installed, partial, symlinks=True)
+        shutil.rmtree(partial / 'Contents' / 'MacOS')
+        (staging / 'state.json').write_text(json.dumps({'name': installed.name, 'identifier': IDENTIFIER,
+                                                        'fingerprint': install.fingerprint(installed)}))
+        result = self.run_install('restore')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('removed an incomplete copy', result.stdout)
+        self.assertEqual(self.version(), '1.0', 'the real previous version, not the partial copy')
+        self.assertEqual(self.verify_signature(installed), 0)
+        self.assertEqual(self.leftovers(), [])
+
     def test_the_check_refuses_an_executable_it_cannot_read(self):
         bundle = self.made('garbled')
         (bundle / 'Contents' / 'MacOS' / 'MyIsiXPlugin').write_text('not a Mach-O file')

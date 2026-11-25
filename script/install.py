@@ -162,6 +162,16 @@ def interrupt_for_test(point):
         os._exit(9)
 
 
+def is_complete_bundle(bundle, identifier):
+    """Whether the bundle is whole: the application would load it, its
+    signature verifies and it has the given identifier."""
+    try:
+        facts, problems, _ = verify_bundle.inspect(bundle)
+    except Exception:  # an unreadable leftover is not a whole bundle
+        return False
+    return not problems and bool(facts.get('signed')) and facts.get('identifier') == identifier
+
+
 def keep_as_previous(old, destination):
     previous = destination.parent / PREVIOUS_FOLDER / destination.name
     previous.parent.mkdir(exist_ok=True)
@@ -187,11 +197,17 @@ def recover(folder):
         published = bool(name and expected) and (folder / name).is_dir() and fingerprint(folder / name) == expected
         if published and inner.exists() and fingerprint(inner) != expected:
             # The installed bundle is the new version, so what is left here is
-            # the one the swap displaced. Anything else (a copy cut short,
-            # also by an older installer that copied straight into the
-            # staging folder) is dropped and never kept or published.
-            previous = keep_as_previous(inner, folder / name)
-            done.append(f'kept the version replaced by an interrupted install as {previous}')
+            # the one the swap displaced, unless it is a copy an older installer
+            # (which copied straight into the staging folder) left unfinished
+            # while reinstalling that same version. Only a whole bundle of the
+            # installed plugin is kept; anything else is dropped, never kept or
+            # published, and the saved previous version stays as it is.
+            identifier = (read_info(folder / name) or {}).get('CFBundleIdentifier')
+            if identifier and is_complete_bundle(inner, identifier):
+                previous = keep_as_previous(inner, folder / name)
+                done.append(f'kept the version replaced by an interrupted install as {previous}')
+            else:
+                done.append(f'removed an incomplete copy left by an interrupted install ({name})')
         else:
             done.append(f'removed an install that was interrupted before it was published ({name or staging.name})')
         shutil.rmtree(staging, ignore_errors=True)
